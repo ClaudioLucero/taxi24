@@ -1,7 +1,7 @@
 {
   "name": "taxi24",
   "version": "0.0.1",
-  "description": "",
+  "description": "",  
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -16,8 +16,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "typeorm-ts-node-commonjs",
-    "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/infrastructure/database/typeorm.config.ts",
-    "migration:run": "typeorm-ts-node-commonjs migration:run -d src/infrastructure/database/typeorm.config.ts"
+    "migration:generate": "typeorm-ts-node-commonjs migration:generate -d src/infrastructure/database/typeorm.datasource.ts",
+    "migration:run": "typeorm-ts-node-commonjs migration:run -d src/infrastructure/database/typeorm.datasource.ts"
   },
   "dependencies": {
     "@nestjs/common": "11.1.0",
