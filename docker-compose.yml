@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  db:
+    image: postgis/postgis:14-3.3
+    environment:
+      POSTGRES_USER: taxi24
+      POSTGRES_PASSWORD: taxi24
+      POSTGRES_DB: taxi24
+    ports:
+      - '5432:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgres://taxi24:taxi24@db:5432/taxi24
+      - PORT=3000
+      - THROTTLE_TTL=60
+      - THROTTLE_LIMIT=100
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: >
+      sh -c "sleep 10 && npm run start:dev"
+volumes:
+  db_data:
