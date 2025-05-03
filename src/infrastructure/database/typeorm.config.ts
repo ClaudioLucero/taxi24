@@ -12,5 +12,5 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   migrations: [join(__dirname, './migrations/*{.ts,.js}')],
   synchronize: false,
   migrationsRun: false,
-  logging: ['error', 'warn']
+  logging: ['error', 'warn'],
 };
