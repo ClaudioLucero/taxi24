@@ -8,7 +8,7 @@ import { NearbyDriversDto } from '../dtos/nearby-drivers.dto';
 export class DriverRepository {
   constructor(
     @InjectRepository(Driver)
-    private readonly repository: Repository<Driver>
+    private readonly repository: Repository<Driver>,
   ) {}
 
   async findAll(): Promise<Driver[]> {
@@ -24,11 +24,17 @@ export class DriverRepository {
     const point = `SRID=4326;POINT(${longitude} ${latitude})`;
     return this.repository
       .createQueryBuilder('driver')
-      .where(
-        'ST_DWithin(driver.location, ST_GeomFromText(:point), :radius * 1000)'
-      )
+      .where('ST_DWithin(driver.location, ST_GeomFromText(:point), :radius * 1000)')
       .andWhere('driver.status = :status')
       .setParameters({ point, radius, status: 'available' })
       .getMany();
+  }
+
+  async findById(id: string): Promise<Driver | null> {
+    return this.repository.findOne({ where: { id } });
+  }
+
+  async updateStatus(id: string, status: 'available' | 'busy' | 'offline'): Promise<void> {
+    await this.repository.update(id, { status });
   }
 }

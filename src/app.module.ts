@@ -15,12 +15,19 @@ import { ListPassengersUseCase } from './application/use-cases/passengers/list-p
 import { GetPassengerUseCase } from './application/use-cases/passengers/get-passenger.use-case';
 import { CreatePassengerUseCase } from './application/use-cases/passengers/create-passenger.use-case';
 import { Passenger } from './domain/entities/passenger.entity';
+import { TripsController } from './infrastructure/controllers/trips.controller';
+import { TripRepository } from './infrastructure/repositories/trip.repository';
+import { ListTripsUseCase } from './application/use-cases/trips/list-trips.use-case';
+import { GetTripUseCase } from './application/use-cases/trips/get-trip.use-case';
+import { CreateTripUseCase } from './application/use-cases/trips/create-trip.use-case';
+import { CompleteTripUseCase } from './application/use-cases/trips/complete-trip.use-case';
+import { Trip } from './domain/entities/trip.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     TypeOrmModule.forRoot(typeOrmConfig),
-    TypeOrmModule.forFeature([Driver, Passenger]),
+    TypeOrmModule.forFeature([Driver, Passenger, Trip]),
     ThrottlerModule.forRoot([
       {
         ttl: Number(process.env.THROTTLE_TTL) || 60,
@@ -28,7 +35,7 @@ import { Passenger } from './domain/entities/passenger.entity';
       },
     ]),
   ],
-  controllers: [DriversController, PassengersController],
+  controllers: [DriversController, PassengersController, TripsController],
   providers: [
     DriverRepository,
     ListDriversUseCase,
@@ -38,6 +45,11 @@ import { Passenger } from './domain/entities/passenger.entity';
     ListPassengersUseCase,
     GetPassengerUseCase,
     CreatePassengerUseCase,
+    TripRepository,
+    ListTripsUseCase,
+    GetTripUseCase,
+    CreateTripUseCase,
+    CompleteTripUseCase,
   ],
 })
 export class AppModule {}
