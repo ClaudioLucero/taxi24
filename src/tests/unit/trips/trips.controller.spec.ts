@@ -4,8 +4,10 @@ import { ListTripsUseCase } from '../../../application/use-cases/trips/list-trip
 import { GetTripUseCase } from '../../../application/use-cases/trips/get-trip.use-case';
 import { CreateTripUseCase } from '../../../application/use-cases/trips/create-trip.use-case';
 import { CompleteTripUseCase } from '../../../application/use-cases/trips/complete-trip.use-case';
+import { GetTripInvoiceUseCase } from '../../../application/use-cases/invoices/get-trip-invoice.use-case';
 import { Trip } from '../../../domain/entities/trip.entity';
-import { CreateTripDto, CompleteTripDto } from '../../../infrastructure/dtos/trip.dto';
+import { Invoice } from '../../../domain/entities/invoice.entity';
+import { CreateTripDto, CompleteTripDto, ListTripsQueryDto } from '../../../infrastructure/dtos/trip.dto';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('TripsController', () => {
@@ -14,6 +16,7 @@ describe('TripsController', () => {
   let getTripUseCase: GetTripUseCase;
   let createTripUseCase: CreateTripUseCase;
   let completeTripUseCase: CompleteTripUseCase;
+  let getTripInvoiceUseCase: GetTripInvoiceUseCase;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -35,6 +38,10 @@ describe('TripsController', () => {
           provide: CompleteTripUseCase,
           useValue: { execute: jest.fn() },
         },
+        {
+          provide: GetTripInvoiceUseCase,
+          useValue: { execute: jest.fn() },
+        },
       ],
     }).compile();
 
@@ -43,6 +50,7 @@ describe('TripsController', () => {
     getTripUseCase = module.get<GetTripUseCase>(GetTripUseCase);
     createTripUseCase = module.get<CreateTripUseCase>(CreateTripUseCase);
     completeTripUseCase = module.get<CompleteTripUseCase>(CompleteTripUseCase);
+    getTripInvoiceUseCase = module.get<GetTripInvoiceUseCase>(GetTripInvoiceUseCase);
   });
 
   it('should be defined', () => {
@@ -61,25 +69,16 @@ describe('TripsController', () => {
           status: 'active',
           cost: 15.50,
           created_at: new Date(),
-          completed_at: undefined,
-          driver: {
-            id: '550e8400-e29b-41d4-a716-446655440000',
-            name: 'Juan Pérez',
-            status: 'available',
-            created_at: new Date(),
-          } as any,
-          passenger: {
-            id: '550e8400-e29b-41d4-a716-446655440003',
-            name: 'Ana Martínez',
-            created_at: new Date(),
-          } as any,
+          completed_at: null,
+          driver: { id: '550e8400-e29b-41d4-a716-446655440000', name: 'Juan Pérez', status: 'available', created_at: new Date() } as any,
+          passenger: { id: '550e8400-e29b-41d4-a716-446655440003', name: 'Ana Martínez', created_at: new Date() } as any,
         },
       ];
-      jest.spyOn(listTripsUseCase, 'execute').mockResolvedValue(trips);
+      jest.spyOn(listTripsUseCase, 'execute').mockResolvedValue({ trips, total: trips.length });
 
-      const result = await controller.findAll();
-      expect(result).toEqual(trips);
-      expect(listTripsUseCase.execute).toHaveBeenCalled();
+      const result = await controller.findAll({});
+      expect(result).toEqual({ trips, total: trips.length });
+      expect(listTripsUseCase.execute).toHaveBeenCalledWith({});
     });
   });
 
@@ -94,18 +93,9 @@ describe('TripsController', () => {
         status: 'active',
         cost: 15.50,
         created_at: new Date(),
-        completed_at: undefined,
-        driver: {
-          id: '550e8400-e29b-41d4-a716-446655440000',
-          name: 'Juan Pérez',
-          status: 'available',
-          created_at: new Date(),
-        } as any,
-        passenger: {
-          id: '550e8400-e29b-41d4-a716-446655440003',
-          name: 'Ana Martínez',
-          created_at: new Date(),
-        } as any,
+        completed_at: null,
+        driver: { id: '550e8400-e29b-41d4-a716-446655440000', name: 'Juan Pérez', status: 'available', created_at: new Date() } as any,
+        passenger: { id: '550e8400-e29b-41d4-a716-446655440003', name: 'Ana Martínez', created_at: new Date() } as any,
       };
       jest.spyOn(getTripUseCase, 'execute').mockResolvedValue(trip);
 
@@ -143,18 +133,9 @@ describe('TripsController', () => {
         status: 'active',
         cost: 25.00,
         created_at: new Date(),
-        completed_at: undefined,
-        driver: {
-          id: '550e8400-e29b-41d4-a716-446655440000',
-          name: 'Juan Pérez',
-          status: 'busy',
-          created_at: new Date(),
-        } as any,
-        passenger: {
-          id: '550e8400-e29b-41d4-a716-446655440003',
-          name: 'Ana Martínez',
-          created_at: new Date(),
-        } as any,
+        completed_at: null,
+        driver: { id: '550e8400-e29b-41d4-a716-446655440000', name: 'Juan Pérez', status: 'busy', created_at: new Date() } as any,
+        passenger: { id: '550e8400-e29b-41d4-a716-446655440003', name: 'Ana Martínez', created_at: new Date() } as any,
       };
       jest.spyOn(createTripUseCase, 'execute').mockResolvedValue(trip);
 
@@ -196,17 +177,8 @@ describe('TripsController', () => {
         cost: 15.50,
         created_at: new Date(),
         completed_at: new Date(),
-        driver: {
-          id: '550e8400-e29b-41d4-a716-446655440000',
-          name: 'Juan Pérez',
-          status: 'available',
-          created_at: new Date(),
-        } as any,
-        passenger: {
-          id: '550e8400-e29b-41d4-a716-446655440003',
-          name: 'Ana Martínez',
-          created_at: new Date(),
-        } as any,
+        driver: { id: '550e8400-e29b-41d4-a716-446655440000', name: 'Juan Pérez', status: 'available', created_at: new Date() } as any,
+        passenger: { id: '550e8400-e29b-41d4-a716-446655440003', name: 'Ana Martínez', created_at: new Date() } as any,
       };
       jest.spyOn(completeTripUseCase, 'execute').mockResolvedValue(trip);
 
@@ -229,6 +201,38 @@ describe('TripsController', () => {
 
       await expect(controller.complete('550e8400-e29b-41d4-a716-446655440005', dto)).rejects.toThrow(BadRequestException);
       expect(completeTripUseCase.execute).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440005', dto);
+    });
+  });
+
+  describe('getTripInvoice', () => {
+    it('should return the invoice for a trip', async () => {
+      const invoice: Invoice = {
+        id: '550e8400-e29b-41d4-a716-446655440007',
+        trip_id: '550e8400-e29b-41d4-a716-446655440006',
+        amount: 20.00,
+        created_at: new Date(),
+        trip: {
+          id: '550e8400-e29b-41d4-a716-446655440006',
+          passenger_id: '550e8400-e29b-41d4-a716-446655440004',
+          driver_id: '550e8400-e29b-41d4-a716-446655440001',
+          status: 'completed',
+          created_at: new Date(),
+        } as any,
+      };
+      jest.spyOn(getTripInvoiceUseCase, 'execute').mockResolvedValue(invoice);
+
+      const result = await controller.getTripInvoice('550e8400-e29b-41d4-a716-446655440006');
+      expect(result).toEqual(invoice);
+      expect(getTripInvoiceUseCase.execute).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440006');
+    });
+
+    it('should throw NotFoundException if invoice not found', async () => {
+      jest.spyOn(getTripInvoiceUseCase, 'execute').mockRejectedValue(
+        new NotFoundException('Invoice for trip ID invalid-id not found'),
+      );
+
+      await expect(controller.getTripInvoice('invalid-id')).rejects.toThrow(NotFoundException);
+      expect(getTripInvoiceUseCase.execute).toHaveBeenCalledWith('invalid-id');
     });
   });
 });

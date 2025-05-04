@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Patch, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ListTripsUseCase } from '../../application/use-cases/trips/list-trips.use-case';
 import { GetTripUseCase } from '../../application/use-cases/trips/get-trip.use-case';
 import { CreateTripUseCase } from '../../application/use-cases/trips/create-trip.use-case';
 import { CompleteTripUseCase } from '../../application/use-cases/trips/complete-trip.use-case';
-import { CreateTripDto, CompleteTripDto } from '../dtos/trip.dto';
+import { GetTripInvoiceUseCase } from '../../application/use-cases/invoices/get-trip-invoice.use-case';
+import { CreateTripDto, CompleteTripDto, ListTripsQueryDto } from '../dtos/trip.dto';
+import { Invoice } from '../../domain/entities/invoice.entity';
 import { Trip } from '../../domain/entities/trip.entity';
 
 @ApiTags('trips')
@@ -15,13 +17,14 @@ export class TripsController {
     private readonly getTripUseCase: GetTripUseCase,
     private readonly createTripUseCase: CreateTripUseCase,
     private readonly completeTripUseCase: CompleteTripUseCase,
+    private readonly getTripInvoiceUseCase: GetTripInvoiceUseCase,
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'List all trips' })
-  @ApiResponse({ status: 200, description: 'List of all trips', type: [Trip] })
-  async findAll(): Promise<Trip[]> {
-    return this.listTripsUseCase.execute();
+  @ApiOperation({ summary: 'List all trips with pagination' })
+  @ApiResponse({ status: 200, description: 'List of trips', type: [Trip] })
+  async findAll(@Query() query: ListTripsQueryDto): Promise<{ trips: Trip[]; total: number }> {
+    return this.listTripsUseCase.execute(query);
   }
 
   @Get(':id')
@@ -45,5 +48,13 @@ export class TripsController {
   @ApiResponse({ status: 404, description: 'Trip not found' })
   async complete(@Param('id') id: string, @Body() dto: CompleteTripDto): Promise<Trip> {
     return this.completeTripUseCase.execute(id, dto);
+  }
+
+  @Get(':id/invoice')
+  @ApiOperation({ summary: 'Get invoice by trip ID' })
+  @ApiResponse({ status: 200, description: 'Invoice details', type: Invoice })
+  @ApiResponse({ status: 404, description: 'Invoice not found' })
+  async getTripInvoice(@Param('id') tripId: string): Promise<Invoice> {
+    return this.getTripInvoiceUseCase.execute(tripId);
   }
 }

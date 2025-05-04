@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Trip } from '../../domain/entities/trip.entity';
-import { CreateTripDto, CompleteTripDto } from '../dtos/trip.dto';
+import { CreateTripDto, CompleteTripDto, ListTripsQueryDto } from '../dtos/trip.dto';
 import { DriverRepository } from './driver.repository';
 import { PassengerRepository } from './passenger.repository';
 
@@ -15,8 +15,14 @@ export class TripRepository {
     private readonly passengerRepository: PassengerRepository,
   ) {}
 
-  async findAll(): Promise<Trip[]> {
-    return this.repository.find({ relations: ['driver', 'passenger'] });
+  async findAll(query: ListTripsQueryDto): Promise<{ trips: Trip[]; total: number }> {
+    const { page = 1, limit = 100 } = query;
+    const [trips, total] = await this.repository.findAndCount({
+      relations: ['driver', 'passenger'],
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+    return { trips, total };
   }
 
   async findById(id: string): Promise<Trip | null> {
@@ -45,7 +51,7 @@ export class TripRepository {
       const drivers = await this.driverRepository.findNearby({
         latitude: dto.start_latitude,
         longitude: dto.start_longitude,
-        radius: 3, // 3 km
+        radius: 3,
       });
       if (!drivers.length) {
         throw new BadRequestException('No available drivers found near the start location');
