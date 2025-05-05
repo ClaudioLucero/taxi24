@@ -69,7 +69,7 @@ describe('TripsController', () => {
           status: 'active',
           cost: 15.50,
           created_at: new Date(),
-          completed_at: null,
+          completed_at: undefined, // Cambiar de null a undefined
           driver: { id: '550e8400-e29b-41d4-a716-446655440000', name: 'Juan Pérez', status: 'available', created_at: new Date() } as any,
           passenger: { id: '550e8400-e29b-41d4-a716-446655440003', name: 'Ana Martínez', created_at: new Date() } as any,
         },
@@ -93,7 +93,7 @@ describe('TripsController', () => {
         status: 'active',
         cost: 15.50,
         created_at: new Date(),
-        completed_at: null,
+        completed_at: undefined, // Cambiar de null a undefined
         driver: { id: '550e8400-e29b-41d4-a716-446655440000', name: 'Juan Pérez', status: 'available', created_at: new Date() } as any,
         passenger: { id: '550e8400-e29b-41d4-a716-446655440003', name: 'Ana Martínez', created_at: new Date() } as any,
       };
@@ -133,7 +133,7 @@ describe('TripsController', () => {
         status: 'active',
         cost: 25.00,
         created_at: new Date(),
-        completed_at: null,
+        completed_at: undefined, // Cambiar de null a undefined
         driver: { id: '550e8400-e29b-41d4-a716-446655440000', name: 'Juan Pérez', status: 'busy', created_at: new Date() } as any,
         passenger: { id: '550e8400-e29b-41d4-a716-446655440003', name: 'Ana Martínez', created_at: new Date() } as any,
       };

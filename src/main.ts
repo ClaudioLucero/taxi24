@@ -7,9 +7,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(
     new ValidationPipe({
-      transform: true, // Convierte cadenas a tipos esperados (por ejemplo, "40.7128" a 40.7128)
-      transformOptions: { enableImplicitConversion: true }, // Habilita conversión implícita
-    })
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+      forbidNonWhitelisted: true, // Rechazar propiedades no definidas
+      whitelist: true, // Eliminar propiedades no esperadas
+      forbidUnknownValues: true, // Rechazar valores no válidos
+      stopAtFirstError: true, // Detenerse en el primer error
+    }),
   );
   setupSwagger(app);
   await app.listen(process.env.PORT || 3000);

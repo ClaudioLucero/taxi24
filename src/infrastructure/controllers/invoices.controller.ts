@@ -11,7 +11,9 @@ export class InvoicesController {
   constructor(
     private readonly listInvoicesUseCase: ListInvoicesUseCase,
     private readonly getTripInvoiceUseCase: GetTripInvoiceUseCase,
-  ) {}
+  ) {
+    console.log('InvoicesController initialized');
+  }
 
   @Get()
   @ApiOperation({ summary: 'List invoices with filters' })

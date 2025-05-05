@@ -5,6 +5,9 @@ import { Trip } from '../../domain/entities/trip.entity';
 import { CreateTripDto, CompleteTripDto, ListTripsQueryDto } from '../dtos/trip.dto';
 import { DriverRepository } from './driver.repository';
 import { PassengerRepository } from './passenger.repository';
+import { DriverStatus } from '../../domain/entities/enums/driver-status.enum';
+
+
 
 @Injectable()
 export class TripRepository {
@@ -13,7 +16,9 @@ export class TripRepository {
     private readonly repository: Repository<Trip>,
     private readonly driverRepository: DriverRepository,
     private readonly passengerRepository: PassengerRepository,
-  ) {}
+  ) {
+    console.log('TripRepository initialized');
+  }
 
   async findAll(query: ListTripsQueryDto): Promise<{ trips: Trip[]; total: number }> {
     const { page = 1, limit = 100 } = query;
@@ -30,13 +35,11 @@ export class TripRepository {
   }
 
   async create(dto: CreateTripDto): Promise<Trip> {
-    // Validar pasajero
     const passenger = await this.passengerRepository.findById(dto.passenger_id);
     if (!passenger) {
       throw new NotFoundException(`Passenger with ID ${dto.passenger_id} not found`);
     }
 
-    // Validar conductor (si se proporciona)
     let driverId = dto.driver_id;
     if (driverId) {
       const driver = await this.driverRepository.findById(driverId);
@@ -47,7 +50,6 @@ export class TripRepository {
         throw new BadRequestException(`Driver with ID ${driverId} is not available (current status: ${driver.status})`);
       }
     } else {
-      // Buscar conductor disponible más cercano
       const drivers = await this.driverRepository.findNearby({
         latitude: dto.start_latitude,
         longitude: dto.start_longitude,
@@ -59,10 +61,8 @@ export class TripRepository {
       driverId = drivers[0].id;
     }
 
-    // Actualizar estado del conductor
-    await this.driverRepository.updateStatus(driverId, 'busy');
+    await this.driverRepository.updateStatus(driverId, DriverStatus.BUSY);
 
-    // Crear viaje
     const query = `
       INSERT INTO trips (driver_id, passenger_id, start_location, end_location, status, cost, created_at)
       VALUES ($1, $2, ST_SetSRID(ST_MakePoint($3, $4), 4326), ST_SetSRID(ST_MakePoint($5, $6), 4326), $7, $8, NOW())
@@ -94,9 +94,8 @@ export class TripRepository {
     trip.cost = dto.cost;
     trip.completed_at = new Date();
 
-    // Liberar conductor
     if (trip.driver_id) {
-      await this.driverRepository.updateStatus(trip.driver_id, 'available');
+      await this.driverRepository.updateStatus(trip.driver_id,DriverStatus.AVAILABLE);
     }
 
     return this.repository.save(trip);

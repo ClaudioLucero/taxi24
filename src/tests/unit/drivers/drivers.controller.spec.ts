@@ -4,6 +4,8 @@ import { ListDriversUseCase } from '../../../application/use-cases/drivers/list-
 import { ListAvailableDriversUseCase } from '../../../application/use-cases/drivers/list-available-drivers.use-case';
 import { ListNearbyDriversUseCase } from '../../../application/use-cases/drivers/list-nearby-drivers.use-case';
 import { Driver } from '../../../domain/entities/driver.entity';
+import { NearbyDriversDto } from '../../../infrastructure/dtos/nearby-drivers.dto';
+import { DriverStatus } from '../../../domain/entities/enums/driver-status.enum';
 
 describe('DriversController', () => {
   let controller: DriversController;
@@ -47,8 +49,8 @@ describe('DriversController', () => {
           id: '550e8400-e29b-41d4-a716-446655440000',
           name: 'Juan Pérez',
           phone: '1234567890',
-          location: 'POINT(-74.006 40.7128)',
-          status: 'available',
+          location: 'SRID=4326;POINT(-74.006 40.7128)',
+          status: DriverStatus.AVAILABLE,
           created_at: new Date(),
         },
       ];
@@ -67,8 +69,8 @@ describe('DriversController', () => {
           id: '550e8400-e29b-41d4-a716-446655440000',
           name: 'Juan Pérez',
           phone: '1234567890',
-          location: 'POINT(-74.006 40.7128)',
-          status: 'available',
+          location: 'SRID=4326;POINT(-74.006 40.7128)',
+          status: DriverStatus.AVAILABLE,
           created_at: new Date(),
         },
       ];
@@ -87,12 +89,12 @@ describe('DriversController', () => {
           id: '550e8400-e29b-41d4-a716-446655440000',
           name: 'Juan Pérez',
           phone: '1234567890',
-          location: 'POINT(-74.006 40.7128)',
-          status: 'available',
+          location: 'SRID=4326;POINT(-74.006 40.7128)',
+          status: DriverStatus.AVAILABLE,
           created_at: new Date(),
         },
       ];
-      const dto = { latitude: 40.7128, longitude: -74.0060, radius: 5 };
+      const dto: NearbyDriversDto = { latitude: 40.7128, longitude: -74.0060, radius: 5 };
       jest.spyOn(listNearbyDriversUseCase, 'execute').mockResolvedValue(drivers);
 
       const result = await controller.findNearby(dto);

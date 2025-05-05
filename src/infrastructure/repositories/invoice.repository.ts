@@ -11,7 +11,9 @@ export class InvoiceRepository {
     @InjectRepository(Invoice)
     private readonly repository: Repository<Invoice>,
     private readonly tripRepository: TripRepository,
-  ) {}
+  ) {
+    console.log('InvoiceRepository initialized');
+  }
 
   async findAll(filters: InvoiceFiltersDto): Promise<{ invoices: Invoice[]; total: number }> {
     const { passengerId, driverId, startDate, endDate, page = 1, limit = 100 } = filters;

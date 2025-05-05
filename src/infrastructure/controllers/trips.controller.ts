@@ -18,7 +18,9 @@ export class TripsController {
     private readonly createTripUseCase: CreateTripUseCase,
     private readonly completeTripUseCase: CompleteTripUseCase,
     private readonly getTripInvoiceUseCase: GetTripInvoiceUseCase,
-  ) {}
+  ) {
+    console.log('PassengersController initialized');
+  }
 
   @Get()
   @ApiOperation({ summary: 'List all trips with pagination' })

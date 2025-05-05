@@ -3,7 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PassengerRepository } from '../../../infrastructure/repositories/passenger.repository';
 import { Passenger } from '../../../domain/entities/passenger.entity';
-import { CreatePassengerDto } from '../../../infrastructure/dtos/passenger.dto';
+import { BadRequestException } from '@nestjs/common';
 
 describe('PassengerRepository', () => {
   let repository: PassengerRepository;
@@ -47,7 +47,7 @@ describe('PassengerRepository', () => {
   });
 
   describe('findById', () => {
-    it('should return a passenger by ID', async () => {
+    it('should return a passenger if found', async () => {
       const passenger: Passenger = {
         id: '550e8400-e29b-41d4-a716-446655440003',
         name: 'Ana Martínez',
@@ -58,25 +58,35 @@ describe('PassengerRepository', () => {
 
       const result = await repository.findById('550e8400-e29b-41d4-a716-446655440003');
       expect(result).toEqual(passenger);
-      expect(typeOrmRepository.findOne).toHaveBeenCalledWith({ where: { id: '550e8400-e29b-41d4-a716-446655440003' } });
+      expect(typeOrmRepository.findOne).toHaveBeenCalledWith({
+        where: { id: '550e8400-e29b-41d4-a716-446655440003' },
+      });
     });
 
-    it('should return null if passenger not found', async () => {
+    it('should throw BadRequestException for invalid UUID', async () => {
+      await expect(repository.findById('invalid-id')).rejects.toThrow(
+        new BadRequestException('Invalid UUID format for passenger ID: invalid-id'),
+      );
+    });
+
+    it('should return null if passenger not found with valid UUID', async () => {
       jest.spyOn(typeOrmRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await repository.findById('invalid-id');
+      const result = await repository.findById('550e8400-e29b-41d4-a716-999999999999');
       expect(result).toBeNull();
-      expect(typeOrmRepository.findOne).toHaveBeenCalledWith({ where: { id: 'invalid-id' } });
+      expect(typeOrmRepository.findOne).toHaveBeenCalledWith({
+        where: { id: '550e8400-e29b-41d4-a716-999999999999' },
+      });
     });
   });
 
   describe('create', () => {
-    it('should create a new passenger', async () => {
-      const dto: CreatePassengerDto = { name: 'Sofía Ramírez', phone: '7778889999' };
+    it('should create a passenger', async () => {
+      const dto = { name: 'Test Passenger', phone: '1234567890' };
       const passenger: Passenger = {
-        id: '550e8400-e29b-41d4-a716-446655440005',
-        name: 'Sofía Ramírez',
-        phone: '7778889999',
+        id: '550e8400-e29b-41d4-a716-446655440006',
+        name: dto.name,
+        phone: dto.phone,
         created_at: new Date(),
       };
       jest.spyOn(typeOrmRepository, 'create').mockReturnValue(passenger);

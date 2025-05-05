@@ -4,24 +4,28 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
 } from 'typeorm';
+import { DriverStatus } from './enums/driver-status.enum';
 
 @Entity('drivers')
 export class Driver {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
-  @Column({ length: 100 })
+  id!: string
+  @Column()
   name!: string;
 
-  @Column({ length: 20, nullable: true })
-  phone?: string;
+  @Column({ nullable: true })
+  phone!: string;
 
-  @Column({ type: 'geometry', nullable: true })
-  location?: string;
+  @Column({ type: 'geometry', srid: 4326, nullable: true })
+  location!: string;
 
-  @Column({ length: 20, default: 'available' })
-  status!: 'available' | 'busy' | 'offline';
+  @Column({
+    type: 'varchar',
+    enum: DriverStatus,
+    default: DriverStatus.AVAILABLE,
+  })
+  status!: DriverStatus;
 
-  @CreateDateColumn()
+  @Column()
   created_at!: Date;
 }

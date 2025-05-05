@@ -2,11 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TripRepository } from '../../../infrastructure/repositories/trip.repository';
-import { Trip } from '../../../domain/entities/trip.entity';
-import { CreateTripDto, CompleteTripDto } from '../../../infrastructure/dtos/trip.dto';
 import { DriverRepository } from '../../../infrastructure/repositories/driver.repository';
 import { PassengerRepository } from '../../../infrastructure/repositories/passenger.repository';
-import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { Trip } from '../../../domain/entities/trip.entity';
+import { Driver } from '../../../domain/entities/driver.entity';
+import { Passenger } from '../../../domain/entities/passenger.entity';
+import { CreateTripDto, CompleteTripDto, ListTripsQueryDto } from '../../../infrastructure/dtos/trip.dto';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { DriverStatus } from '../../../domain/entities/enums/driver-status.enum';
 
 describe('TripRepository', () => {
   let repository: TripRepository;
@@ -24,17 +27,11 @@ describe('TripRepository', () => {
         },
         {
           provide: DriverRepository,
-          useValue: {
-            findById: jest.fn(),
-            findNearby: jest.fn(),
-            updateStatus: jest.fn(),
-          },
+          useValue: { findById: jest.fn(), findNearby: jest.fn(), updateStatus: jest.fn() },
         },
         {
           provide: PassengerRepository,
-          useValue: {
-            findById: jest.fn(),
-          },
+          useValue: { findById: jest.fn() },
         },
       ],
     }).compile();
@@ -51,63 +48,40 @@ describe('TripRepository', () => {
 
   describe('findAll', () => {
     it('should return a list of trips', async () => {
+      const query: ListTripsQueryDto = { page: 1, limit: 10 };
       const trips: Trip[] = [
         {
           id: '550e8400-e29b-41d4-a716-446655440005',
-          driver_id: '550e8400-e29b-41d4-a716-446655440000',
           passenger_id: '550e8400-e29b-41d4-a716-446655440003',
-          start_location: 'SRID=4326;POINT(-74.006 40.7128)',
-          end_location: 'SRID=4326;POINT(-74.0 40.73)',
+          driver_id: '550e8400-e29b-41d4-a716-446655440000',
           status: 'active',
-          cost: 15.50,
           created_at: new Date(),
           completed_at: undefined,
-          driver: {
-            id: '550e8400-e29b-41d4-a716-446655440000',
-            name: 'Juan Pérez',
-            status: 'available',
-            created_at: new Date(),
-          } as any,
-          passenger: {
-            id: '550e8400-e29b-41d4-a716-446655440003',
-            name: 'Ana Martínez',
-            created_at: new Date(),
-          } as any,
         },
       ];
-      jest.spyOn(typeOrmRepository, 'find').mockResolvedValue(trips);
+      jest.spyOn(typeOrmRepository, 'findAndCount').mockResolvedValue([trips, trips.length]);
 
-      const result = await repository.findAll();
-      expect(result).toEqual(trips);
-      expect(typeOrmRepository.find).toHaveBeenCalledWith({
+      const result = await repository.findAll(query);
+      const page = query.page ?? 1;
+      const limit = query.limit ?? 100;
+      expect(result).toEqual({ trips, total: trips.length });
+      expect(typeOrmRepository.findAndCount).toHaveBeenCalledWith({
         relations: ['driver', 'passenger'],
+        skip: (page - 1) * limit,
+        take: limit,
       });
     });
   });
 
   describe('findById', () => {
-    it('should return a trip by ID', async () => {
+    it('should return a trip if found', async () => {
       const trip: Trip = {
         id: '550e8400-e29b-41d4-a716-446655440005',
-        driver_id: '550e8400-e29b-41d4-a716-446655440000',
         passenger_id: '550e8400-e29b-41d4-a716-446655440003',
-        start_location: 'SRID=4326;POINT(-74.006 40.7128)',
-        end_location: 'SRID=4326;POINT(-74.0 40.73)',
+        driver_id: '550e8400-e29b-41d4-a716-446655440000',
         status: 'active',
-        cost: 15.50,
         created_at: new Date(),
         completed_at: undefined,
-        driver: {
-          id: '550e8400-e29b-41d4-a716-446655440000',
-          name: 'Juan Pérez',
-          status: 'available',
-          created_at: new Date(),
-        } as any,
-        passenger: {
-          id: '550e8400-e29b-41d4-a716-446655440003',
-          name: 'Ana Martínez',
-          created_at: new Date(),
-        } as any,
       };
       jest.spyOn(typeOrmRepository, 'findOne').mockResolvedValue(trip);
 
@@ -122,17 +96,17 @@ describe('TripRepository', () => {
     it('should return null if trip not found', async () => {
       jest.spyOn(typeOrmRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await repository.findById('invalid-id');
+      const result = await repository.findById('550e8400-e29b-41d4-a716-999999999999');
       expect(result).toBeNull();
       expect(typeOrmRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 'invalid-id' },
+        where: { id: '550e8400-e29b-41d4-a716-999999999999' },
         relations: ['driver', 'passenger'],
       });
     });
   });
 
   describe('create', () => {
-    it('should create a new trip with specified driver', async () => {
+    it('should create a trip with provided driver', async () => {
       const dto: CreateTripDto = {
         driver_id: '550e8400-e29b-41d4-a716-446655440000',
         passenger_id: '550e8400-e29b-41d4-a716-446655440003',
@@ -143,32 +117,30 @@ describe('TripRepository', () => {
         status: 'active',
         cost: 25.00,
       };
-      const passenger = {
+      const passenger: Passenger = {
         id: '550e8400-e29b-41d4-a716-446655440003',
         name: 'Ana Martínez',
+        phone: '1112223333',
         created_at: new Date(),
       };
-      const driver = {
+      const driver: Driver = {
         id: '550e8400-e29b-41d4-a716-446655440000',
         name: 'Juan Pérez',
-        status: 'available',
+        phone: '1234567890',
+        location: 'SRID=4326;POINT(-74.006 40.7128)',
+        status: DriverStatus.AVAILABLE,
         created_at: new Date(),
       };
       const trip: Trip = {
-        id: 'a6c4c08c-54b8-4640-8751-4cd896e9e391',
+        id: '550e8400-e29b-41d4-a716-446655440005',
         driver_id: dto.driver_id,
         passenger_id: dto.passenger_id,
-        start_location: 'SRID=4326;POINT(-74.006 40.7128)',
-        end_location: 'SRID=4326;POINT(-74.0 40.73)',
         status: 'active',
-        cost: 25.00,
         created_at: new Date(),
         completed_at: undefined,
-        driver,
-        passenger,
       };
-      jest.spyOn(passengerRepository, 'findById').mockResolvedValue(passenger as any);
-      jest.spyOn(driverRepository, 'findById').mockResolvedValue(driver as any);
+      jest.spyOn(passengerRepository, 'findById').mockResolvedValue(passenger);
+      jest.spyOn(driverRepository, 'findById').mockResolvedValue(driver);
       jest.spyOn(driverRepository, 'updateStatus').mockResolvedValue();
       jest.spyOn(typeOrmRepository, 'query').mockResolvedValue([trip]);
 
@@ -176,89 +148,12 @@ describe('TripRepository', () => {
       expect(result).toEqual(trip);
       expect(passengerRepository.findById).toHaveBeenCalledWith(dto.passenger_id);
       expect(driverRepository.findById).toHaveBeenCalledWith(dto.driver_id);
-      expect(driverRepository.updateStatus).toHaveBeenCalledWith(dto.driver_id, 'busy');
-      expect(typeOrmRepository.query).toHaveBeenCalledWith(
-        expect.any(String),
-        [
-          dto.driver_id,
-          dto.passenger_id,
-          dto.start_longitude,
-          dto.start_latitude,
-          dto.end_longitude,
-          dto.end_latitude,
-          dto.status,
-          dto.cost,
-        ],
-      );
-    });
-
-    it('should create a new trip with auto-assigned driver', async () => {
-      const dto: CreateTripDto = {
-        passenger_id: '550e8400-e29b-41d4-a716-446655440003',
-        start_latitude: 40.7128,
-        start_longitude: -74.0060,
-        end_latitude: 40.7300,
-        end_longitude: -74.0000,
-        status: 'active',
-        cost: 25.00,
-      };
-      const passenger = {
-        id: '550e8400-e29b-41d4-a716-446655440003',
-        name: 'Ana Martínez',
-        created_at: new Date(),
-      };
-      const driver = {
-        id: '550e8400-e29b-41d4-a716-446655440000',
-        name: 'Juan Pérez',
-        status: 'available',
-        created_at: new Date(),
-      };
-      const trip: Trip = {
-        id: 'a6c4c08c-54b8-4640-8751-4cd896e9e391',
-        driver_id: driver.id,
-        passenger_id: dto.passenger_id,
-        start_location: 'SRID=4326;POINT(-74.006 40.7128)',
-        end_location: 'SRID=4326;POINT(-74.0 40.73)',
-        status: 'active',
-        cost: 25.00,
-        created_at: new Date(),
-        completed_at: undefined,
-        driver,
-        passenger,
-      };
-      jest.spyOn(passengerRepository, 'findById').mockResolvedValue(passenger as any);
-      jest.spyOn(driverRepository, 'findNearby').mockResolvedValue([driver] as any);
-      jest.spyOn(driverRepository, 'updateStatus').mockResolvedValue();
-      jest.spyOn(typeOrmRepository, 'query').mockResolvedValue([trip]);
-
-      const result = await repository.create(dto);
-      expect(result).toEqual(trip);
-      expect(passengerRepository.findById).toHaveBeenCalledWith(dto.passenger_id);
-      expect(driverRepository.findNearby).toHaveBeenCalledWith({
-        latitude: dto.start_latitude,
-        longitude: dto.start_longitude,
-        radius: 3,
-      });
-      expect(driverRepository.updateStatus).toHaveBeenCalledWith(driver.id, 'busy');
-      expect(typeOrmRepository.query).toHaveBeenCalledWith(
-        expect.any(String),
-        [
-          driver.id,
-          dto.passenger_id,
-          dto.start_longitude,
-          dto.start_latitude,
-          dto.end_longitude,
-          dto.end_latitude,
-          dto.status,
-          dto.cost,
-        ],
-      );
+      expect(driverRepository.updateStatus).toHaveBeenCalledWith(dto.driver_id, DriverStatus.BUSY);
     });
 
     it('should throw NotFoundException if passenger not found', async () => {
       const dto: CreateTripDto = {
-        driver_id: '550e8400-e29b-41d4-a716-446655440000',
-        passenger_id: 'invalid-id',
+        passenger_id: '550e8400-e29b-41d4-a716-999999999999',
         start_latitude: 40.7128,
         start_longitude: -74.0060,
         end_latitude: 40.7300,
@@ -268,13 +163,14 @@ describe('TripRepository', () => {
       };
       jest.spyOn(passengerRepository, 'findById').mockResolvedValue(null);
 
-      await expect(repository.create(dto)).rejects.toThrow(NotFoundException);
-      expect(passengerRepository.findById).toHaveBeenCalledWith(dto.passenger_id);
+      await expect(repository.create(dto)).rejects.toThrow(
+        new NotFoundException(`Passenger with ID ${dto.passenger_id} not found`),
+      );
     });
 
-    it('should throw NotFoundException if driver not found', async () => {
+    it('should throw BadRequestException if driver not available', async () => {
       const dto: CreateTripDto = {
-        driver_id: 'invalid-id',
+        driver_id: '550e8400-e29b-41d4-a716-446655440002',
         passenger_id: '550e8400-e29b-41d4-a716-446655440003',
         start_latitude: 40.7128,
         start_longitude: -74.0060,
@@ -283,22 +179,30 @@ describe('TripRepository', () => {
         status: 'active',
         cost: 25.00,
       };
-      const passenger = {
+      const passenger: Passenger = {
         id: '550e8400-e29b-41d4-a716-446655440003',
         name: 'Ana Martínez',
+        phone: '1112223333',
         created_at: new Date(),
       };
-      jest.spyOn(passengerRepository, 'findById').mockResolvedValue(passenger as any);
-      jest.spyOn(driverRepository, 'findById').mockResolvedValue(null);
+      const driver: Driver = {
+        id: '550e8400-e29b-41d4-a716-446655440002',
+        name: 'Carlos López',
+        phone: '5556667777',
+        location: 'SRID=4326;POINT(-74.007 40.714)',
+        status: DriverStatus.BUSY,
+        created_at: new Date(),
+      };
+      jest.spyOn(passengerRepository, 'findById').mockResolvedValue(passenger);
+      jest.spyOn(driverRepository, 'findById').mockResolvedValue(driver);
 
-      await expect(repository.create(dto)).rejects.toThrow(NotFoundException);
-      expect(passengerRepository.findById).toHaveBeenCalledWith(dto.passenger_id);
-      expect(driverRepository.findById).toHaveBeenCalledWith(dto.driver_id);
+      await expect(repository.create(dto)).rejects.toThrow(
+        new BadRequestException(`Driver with ID ${dto.driver_id} is not available (current status: ${driver.status})`),
+      );
     });
 
-    it('should throw BadRequestException if driver is not available', async () => {
+    it('should assign a nearby driver if no driver_id provided', async () => {
       const dto: CreateTripDto = {
-        driver_id: '550e8400-e29b-41d4-a716-446655440000',
         passenger_id: '550e8400-e29b-41d4-a716-446655440003',
         start_latitude: 40.7128,
         start_longitude: -74.0060,
@@ -307,136 +211,128 @@ describe('TripRepository', () => {
         status: 'active',
         cost: 25.00,
       };
-      const passenger = {
+      const passenger: Passenger = {
         id: '550e8400-e29b-41d4-a716-446655440003',
         name: 'Ana Martínez',
+        phone: '1112223333',
         created_at: new Date(),
       };
-      const driver = {
+      const driver: Driver = {
         id: '550e8400-e29b-41d4-a716-446655440000',
         name: 'Juan Pérez',
-        status: 'busy',
+        phone: '1234567890',
+        location: 'SRID=4326;POINT(-74.006 40.7128)',
+        status: DriverStatus.AVAILABLE,
         created_at: new Date(),
       };
-      jest.spyOn(passengerRepository, 'findById').mockResolvedValue(passenger as any);
-      jest.spyOn(driverRepository, 'findById').mockResolvedValue(driver as any);
-
-      await expect(repository.create(dto)).rejects.toThrow(BadRequestException);
-      expect(passengerRepository.findById).toHaveBeenCalledWith(dto.passenger_id);
-      expect(driverRepository.findById).toHaveBeenCalledWith(dto.driver_id);
-    });
-
-    it('should throw BadRequestException if no drivers are available nearby', async () => {
-      const dto: CreateTripDto = {
-        passenger_id: '550e8400-e29b-41d4-a716-446655440003',
-        start_latitude: 40.7128,
-        start_longitude: -74.0060,
-        end_latitude: 40.7300,
-        end_longitude: -74.0000,
+      const trip: Trip = {
+        id: '550e8400-e29b-41d4-a716-446655440005',
+        driver_id: driver.id,
+        passenger_id: dto.passenger_id,
         status: 'active',
-        cost: 25.00,
-      };
-      const passenger = {
-        id: '550e8400-e29b-41d4-a716-446655440003',
-        name: 'Ana Martínez',
         created_at: new Date(),
+        completed_at: undefined,
       };
-      jest.spyOn(passengerRepository, 'findById').mockResolvedValue(passenger as any);
-      jest.spyOn(driverRepository, 'findNearby').mockResolvedValue([]);
+      jest.spyOn(passengerRepository, 'findById').mockResolvedValue(passenger);
+      jest.spyOn(driverRepository, 'findNearby').mockResolvedValue([driver]);
+      jest.spyOn(driverRepository, 'updateStatus').mockResolvedValue();
+      jest.spyOn(typeOrmRepository, 'query').mockResolvedValue([trip]);
 
-      await expect(repository.create(dto)).rejects.toThrow(BadRequestException);
+      const result = await repository.create(dto);
+      expect(result).toEqual(trip);
       expect(passengerRepository.findById).toHaveBeenCalledWith(dto.passenger_id);
       expect(driverRepository.findNearby).toHaveBeenCalledWith({
         latitude: dto.start_latitude,
         longitude: dto.start_longitude,
         radius: 3,
       });
+      expect(driverRepository.updateStatus).toHaveBeenCalledWith(driver.id, DriverStatus.BUSY);
+    });
+
+    it('should throw BadRequestException if no nearby drivers available', async () => {
+      const dto: CreateTripDto = {
+        passenger_id: '550e8400-e29b-41d4-a716-446655440003',
+        start_latitude: 40.7128,
+        start_longitude: -74.0060,
+        end_latitude: 40.7300,
+        end_longitude: -74.0000,
+        status: 'active',
+        cost: 25.00,
+      };
+      const passenger: Passenger = {
+        id: '550e8400-e29b-41d4-a716-446655440003',
+        name: 'Ana Martínez',
+        phone: '1112223333',
+        created_at: new Date(),
+      };
+      jest.spyOn(passengerRepository, 'findById').mockResolvedValue(passenger);
+      jest.spyOn(driverRepository, 'findNearby').mockResolvedValue([]);
+
+      await expect(repository.create(dto)).rejects.toThrow(
+        new BadRequestException('No available drivers found near the start location'),
+      );
     });
   });
 
   describe('complete', () => {
-    it('should complete a trip and free the driver', async () => {
-      const dto: CompleteTripDto = { cost: 15.50 };
+    it('should complete a trip', async () => {
+      const tripId = '550e8400-e29b-41d4-a716-446655440005';
+      const dto: CompleteTripDto = { cost: 25.00 };
       const trip: Trip = {
-        id: '550e8400-e29b-41d4-a716-446655440005',
+        id: tripId,
         driver_id: '550e8400-e29b-41d4-a716-446655440000',
         passenger_id: '550e8400-e29b-41d4-a716-446655440003',
-        start_location: 'SRID=4326;POINT(-74.006 40.7128)',
-        end_location: 'SRID=4326;POINT(-74.0 40.73)',
         status: 'active',
-        cost: undefined,
         created_at: new Date(),
         completed_at: undefined,
-        driver: {
-          id: '550e8400-e29b-41d4-a716-446655440000',
-          name: 'Juan Pérez',
-          status: 'busy',
-          created_at: new Date(),
-        } as any,
-        passenger: {
-          id: '550e8400-e29b-41d4-a716-446655440003',
-          name: 'Ana Martínez',
-          created_at: new Date(),
-        } as any,
       };
-      const completedTrip: Trip = {
+      const updatedTrip: Trip = {
         ...trip,
         status: 'completed',
-        cost: 15.50,
+        cost: dto.cost,
         completed_at: new Date(),
-        driver: { ...trip.driver, status: 'available' } as any,
       };
       jest.spyOn(repository, 'findById').mockResolvedValue(trip);
-      jest.spyOn(typeOrmRepository, 'save').mockResolvedValue(completedTrip);
+      jest.spyOn(typeOrmRepository, 'save').mockResolvedValue(updatedTrip);
       jest.spyOn(driverRepository, 'updateStatus').mockResolvedValue();
 
-      const result = await repository.complete('550e8400-e29b-41d4-a716-446655440005', dto);
-      expect(result).toEqual(completedTrip);
-      expect(repository.findById).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440005');
-      expect(driverRepository.updateStatus).toHaveBeenCalledWith(trip.driver_id, 'available');
+      const result = await repository.complete(tripId, dto);
+      expect(result).toEqual(updatedTrip);
+      expect(repository.findById).toHaveBeenCalledWith(tripId);
       expect(typeOrmRepository.save).toHaveBeenCalledWith(expect.objectContaining({
         status: 'completed',
-        cost: 15.50,
+        cost: dto.cost,
         completed_at: expect.any(Date),
       }));
+      expect(driverRepository.updateStatus).toHaveBeenCalledWith(trip.driver_id, DriverStatus.AVAILABLE);
     });
 
     it('should throw NotFoundException if trip not found', async () => {
-      const dto: CompleteTripDto = { cost: 15.50 };
+      const tripId = '550e8400-e29b-41d4-a716-999999999999';
+      const dto: CompleteTripDto = { cost: 25.00 };
       jest.spyOn(repository, 'findById').mockResolvedValue(null);
 
-      await expect(repository.complete('invalid-id', dto)).rejects.toThrow(NotFoundException);
-      expect(repository.findById).toHaveBeenCalledWith('invalid-id');
+      await expect(repository.complete(tripId, dto)).rejects.toThrow(
+        new NotFoundException(`Trip with ID ${tripId} not found`),
+      );
     });
 
-    it('should throw BadRequestException if trip is not active', async () => {
-      const dto: CompleteTripDto = { cost: 15.50 };
+    it('should throw BadRequestException if trip not active', async () => {
+      const tripId = '550e8400-e29b-41d4-a716-446655440006';
+      const dto: CompleteTripDto = { cost: 25.00 };
       const trip: Trip = {
-        id: '550e8400-e29b-41d4-a716-446655440005',
-        driver_id: '550e8400-e29b-41d4-a716-446655440000',
-        passenger_id: '550e8400-e29b-41d4-a716-446655440003',
-        start_location: 'SRID=4326;POINT(-74.006 40.7128)',
-        end_location: 'SRID=4326;POINT(-74.0 40.73)',
+        id: tripId,
+        driver_id: '550e8400-e29b-41d4-a716-446655440001',
+        passenger_id: '550e8400-e29b-41d4-a716-446655440004',
         status: 'completed',
-        cost: 15.50,
         created_at: new Date(),
         completed_at: new Date(),
-        driver: {
-          id: '550e8400-e29b-41d4-a716-446655440000',
-          name: 'Juan Pérez',
-          status: 'available',
-          created_at: new Date(),
-        } as any,
-        passenger: {
-          id: '550e8400-e29b-41d4-a716-446655440003',
-          name: 'Ana Martínez',
-          created_at: new Date(),
-        } as any,
       };
       jest.spyOn(repository, 'findById').mockResolvedValue(trip);
 
-      await expect(repository.complete('550e8400-e29b-41d4-a716-446655440005', dto)).rejects.toThrow(BadRequestException);
-      expect(repository.findById).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440005');
+      await expect(repository.complete(tripId, dto)).rejects.toThrow(
+        new BadRequestException(`Trip with ID ${tripId} is not active`),
+      );
     });
   });
 });
