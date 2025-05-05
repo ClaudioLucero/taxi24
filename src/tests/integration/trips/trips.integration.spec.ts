@@ -12,10 +12,7 @@ describe('Trips Integration', () => {
   beforeAll(async () => {
     try {
       const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [
-          AppModule,
-          TypeOrmModule.forRoot(typeOrmTestConfig),
-        ],
+        imports: [AppModule, TypeOrmModule.forRoot(typeOrmTestConfig)],
       }).compile();
 
       app = moduleFixture.createNestApplication();
@@ -78,18 +75,18 @@ describe('Trips Integration', () => {
         driver_id: driverId,
         passenger_id: passengerId,
         start_latitude: 40.7128,
-        start_longitude: -74.0060,
-        end_latitude: 40.7300,
-        end_longitude: -74.0000,
+        start_longitude: -74.006,
+        end_latitude: 40.73,
+        end_longitude: -74.0,
         status: 'active',
-        cost: 25.00,
+        cost: 25.0,
       })
       .expect(201);
     const tripId = tripResponse.body.id;
 
     await request(app.getHttpServer())
       .patch(`/trips/${tripId}/complete`)
-      .send({ cost: 25.00 })
+      .send({ cost: 25.0 })
       .expect(200);
 
     const invoiceResponse = await request(app.getHttpServer())
@@ -109,11 +106,11 @@ describe('Trips Integration', () => {
         driver_id: '550e8400-e29b-41d4-a716-446655440000',
         passenger_id: 'non-existent-id',
         start_latitude: 40.7128,
-        start_longitude: -74.0060,
-        end_latitude: 40.7300,
-        end_longitude: -74.0000,
+        start_longitude: -74.006,
+        end_latitude: 40.73,
+        end_longitude: -74.0,
         status: 'active',
-        cost: 25.00,
+        cost: 25.0,
       })
       .expect(400);
   });
@@ -126,11 +123,11 @@ describe('Trips Integration', () => {
         driver_id: '550e8400-e29b-41d4-a716-446655440000',
         passenger_id: nonExistentId,
         start_latitude: 40.7128,
-        start_longitude: -74.0060,
-        end_latitude: 40.7300,
-        end_longitude: -74.0000,
+        start_longitude: -74.006,
+        end_latitude: 40.73,
+        end_longitude: -74.0,
         status: 'active',
-        cost: 25.00,
+        cost: 25.0,
       })
       .expect(404);
   });
@@ -139,7 +136,7 @@ describe('Trips Integration', () => {
     const tripId = '550e8400-e29b-41d4-a716-446655440006';
     await request(app.getHttpServer())
       .patch(`/trips/${tripId}/complete`)
-      .send({ cost: 25.00 })
+      .send({ cost: 25.0 })
       .expect(400);
   });
 });

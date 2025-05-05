@@ -13,9 +13,7 @@ export class DriversController {
     private readonly listDriversUseCase: ListDriversUseCase,
     private readonly listAvailableDriversUseCase: ListAvailableDriversUseCase,
     private readonly listNearbyDriversUseCase: ListNearbyDriversUseCase
-  ) {  
-      console.log('DriversController initialized');
-  }
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'List all drivers' })
@@ -47,7 +45,6 @@ export class DriversController {
     type: [Driver],
   })
   async findNearby(@Query() dto: NearbyDriversDto): Promise<Driver[]> {
-    console.log('Received NearbyDriversDto:', dto); // Log para depuración
     return this.listNearbyDriversUseCase.execute(dto);
   }
 }

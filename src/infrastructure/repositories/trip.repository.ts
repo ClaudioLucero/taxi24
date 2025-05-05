@@ -1,13 +1,19 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Trip } from '../../domain/entities/trip.entity';
-import { CreateTripDto, CompleteTripDto, ListTripsQueryDto } from '../dtos/trip.dto';
+import {
+  CreateTripDto,
+  CompleteTripDto,
+  ListTripsQueryDto,
+} from '../dtos/trip.dto';
 import { DriverRepository } from './driver.repository';
 import { PassengerRepository } from './passenger.repository';
 import { DriverStatus } from '../../domain/entities/enums/driver-status.enum';
-
-
 
 @Injectable()
 export class TripRepository {
@@ -15,12 +21,12 @@ export class TripRepository {
     @InjectRepository(Trip)
     private readonly repository: Repository<Trip>,
     private readonly driverRepository: DriverRepository,
-    private readonly passengerRepository: PassengerRepository,
-  ) {
-    console.log('TripRepository initialized');
-  }
+    private readonly passengerRepository: PassengerRepository
+  ) {}
 
-  async findAll(query: ListTripsQueryDto): Promise<{ trips: Trip[]; total: number }> {
+  async findAll(
+    query: ListTripsQueryDto
+  ): Promise<{ trips: Trip[]; total: number }> {
     const { page = 1, limit = 100 } = query;
     const [trips, total] = await this.repository.findAndCount({
       relations: ['driver', 'passenger'],
@@ -31,13 +37,18 @@ export class TripRepository {
   }
 
   async findById(id: string): Promise<Trip | null> {
-    return this.repository.findOne({ where: { id }, relations: ['driver', 'passenger'] });
+    return this.repository.findOne({
+      where: { id },
+      relations: ['driver', 'passenger'],
+    });
   }
 
   async create(dto: CreateTripDto): Promise<Trip> {
     const passenger = await this.passengerRepository.findById(dto.passenger_id);
     if (!passenger) {
-      throw new NotFoundException(`Passenger with ID ${dto.passenger_id} not found`);
+      throw new NotFoundException(
+        `Passenger with ID ${dto.passenger_id} not found`
+      );
     }
 
     let driverId = dto.driver_id;
@@ -47,7 +58,9 @@ export class TripRepository {
         throw new NotFoundException(`Driver with ID ${driverId} not found`);
       }
       if (driver.status !== 'available') {
-        throw new BadRequestException(`Driver with ID ${driverId} is not available (current status: ${driver.status})`);
+        throw new BadRequestException(
+          `Driver with ID ${driverId} is not available (current status: ${driver.status})`
+        );
       }
     } else {
       const drivers = await this.driverRepository.findNearby({
@@ -56,7 +69,9 @@ export class TripRepository {
         radius: 3,
       });
       if (!drivers.length) {
-        throw new BadRequestException('No available drivers found near the start location');
+        throw new BadRequestException(
+          'No available drivers found near the start location'
+        );
       }
       driverId = drivers[0].id;
     }
@@ -95,7 +110,10 @@ export class TripRepository {
     trip.completed_at = new Date();
 
     if (trip.driver_id) {
-      await this.driverRepository.updateStatus(trip.driver_id,DriverStatus.AVAILABLE);
+      await this.driverRepository.updateStatus(
+        trip.driver_id,
+        DriverStatus.AVAILABLE
+      );
     }
 
     return this.repository.save(trip);

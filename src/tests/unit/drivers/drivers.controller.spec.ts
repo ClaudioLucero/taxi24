@@ -34,8 +34,12 @@ describe('DriversController', () => {
 
     controller = module.get<DriversController>(DriversController);
     listDriversUseCase = module.get<ListDriversUseCase>(ListDriversUseCase);
-    listAvailableDriversUseCase = module.get<ListAvailableDriversUseCase>(ListAvailableDriversUseCase);
-    listNearbyDriversUseCase = module.get<ListNearbyDriversUseCase>(ListNearbyDriversUseCase);
+    listAvailableDriversUseCase = module.get<ListAvailableDriversUseCase>(
+      ListAvailableDriversUseCase
+    );
+    listNearbyDriversUseCase = module.get<ListNearbyDriversUseCase>(
+      ListNearbyDriversUseCase
+    );
   });
 
   it('should be defined', () => {
@@ -74,7 +78,9 @@ describe('DriversController', () => {
           created_at: new Date(),
         },
       ];
-      jest.spyOn(listAvailableDriversUseCase, 'execute').mockResolvedValue(drivers);
+      jest
+        .spyOn(listAvailableDriversUseCase, 'execute')
+        .mockResolvedValue(drivers);
 
       const result = await controller.findAvailable();
       expect(result).toEqual(drivers);
@@ -94,8 +100,14 @@ describe('DriversController', () => {
           created_at: new Date(),
         },
       ];
-      const dto: NearbyDriversDto = { latitude: 40.7128, longitude: -74.0060, radius: 5 };
-      jest.spyOn(listNearbyDriversUseCase, 'execute').mockResolvedValue(drivers);
+      const dto: NearbyDriversDto = {
+        latitude: 40.7128,
+        longitude: -74.006,
+        radius: 5,
+      };
+      jest
+        .spyOn(listNearbyDriversUseCase, 'execute')
+        .mockResolvedValue(drivers);
 
       const result = await controller.findNearby(dto);
       expect(result).toEqual(drivers);

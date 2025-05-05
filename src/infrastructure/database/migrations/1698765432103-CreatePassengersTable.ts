@@ -31,7 +31,7 @@ export class CreatePassengersTable1698765432103 implements MigrationInterface {
           },
         ],
       }),
-      true,
+      true
     );
   }
 

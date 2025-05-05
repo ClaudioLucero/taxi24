@@ -27,7 +27,9 @@ describe('InvoicesController', () => {
 
     controller = module.get<InvoicesController>(InvoicesController);
     listInvoicesUseCase = module.get<ListInvoicesUseCase>(ListInvoicesUseCase);
-    getTripInvoiceUseCase = module.get<GetTripInvoiceUseCase>(GetTripInvoiceUseCase);
+    getTripInvoiceUseCase = module.get<GetTripInvoiceUseCase>(
+      GetTripInvoiceUseCase
+    );
   });
 
   it('should be defined', () => {
@@ -45,7 +47,7 @@ describe('InvoicesController', () => {
         {
           id: '550e8400-e29b-41d4-a716-446655440007',
           trip_id: '550e8400-e29b-41d4-a716-446655440006',
-          amount: 20.00,
+          amount: 20.0,
           created_at: new Date('2025-05-04T12:00:00Z'),
           trip: {
             id: '550e8400-e29b-41d4-a716-446655440006',
@@ -56,7 +58,9 @@ describe('InvoicesController', () => {
           } as any,
         },
       ];
-      jest.spyOn(listInvoicesUseCase, 'execute').mockResolvedValue({ invoices, total: invoices.length });
+      jest
+        .spyOn(listInvoicesUseCase, 'execute')
+        .mockResolvedValue({ invoices, total: invoices.length });
 
       const result = await controller.listInvoices(filters);
       expect(result).toEqual({ invoices, total: invoices.length });
@@ -66,7 +70,9 @@ describe('InvoicesController', () => {
     it('should handle empty filters', async () => {
       const filters: InvoiceFiltersDto = {};
       const invoices: Invoice[] = [];
-      jest.spyOn(listInvoicesUseCase, 'execute').mockResolvedValue({ invoices, total: 0 });
+      jest
+        .spyOn(listInvoicesUseCase, 'execute')
+        .mockResolvedValue({ invoices, total: 0 });
 
       const result = await controller.listInvoices(filters);
       expect(result).toEqual({ invoices, total: 0 });

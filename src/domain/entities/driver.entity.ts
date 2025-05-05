@@ -9,7 +9,7 @@ import { DriverStatus } from './enums/driver-status.enum';
 @Entity('drivers')
 export class Driver {
   @PrimaryGeneratedColumn('uuid')
-  id!: string
+  id!: string;
   @Column()
   name!: string;
 

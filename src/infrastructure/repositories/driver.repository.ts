@@ -9,10 +9,8 @@ import { DriverStatus } from '../../domain/entities/enums/driver-status.enum';
 export class DriverRepository {
   constructor(
     @InjectRepository(Driver)
-    private readonly repository: Repository<Driver>,
-  ) {
-    console.log('DriverRepository initialized');
-  }
+    private readonly repository: Repository<Driver>
+  ) {}
 
   async findAll(): Promise<Driver[]> {
     return this.repository.find();
@@ -24,7 +22,12 @@ export class DriverRepository {
 
   async findNearby(dto: NearbyDriversDto): Promise<Driver[]> {
     const { latitude, longitude, radius } = dto;
-    console.log('findNearby called with:', { latitude, longitude, radius, types: { latitude: typeof latitude, longitude: typeof longitude } });
+    console.log('findNearby called with:', {
+      latitude,
+      longitude,
+      radius,
+      types: { latitude: typeof latitude, longitude: typeof longitude },
+    });
     // Validar coordenadas (0, 0)
     if (Number(latitude) === 0 && Number(longitude) === 0) {
       console.log('Returning empty array for (0, 0) coordinates');
@@ -40,11 +43,15 @@ export class DriverRepository {
       console.log('Invalid coordinates:', { latitude, longitude });
       throw new BadRequestException('Invalid latitude or longitude');
     }
-    console.log('Executing ST_DWithin query with:', { latitude, longitude, radius: radius * 1000 });
+    console.log('Executing ST_DWithin query with:', {
+      latitude,
+      longitude,
+      radius: radius * 1000,
+    });
     return this.repository
       .createQueryBuilder('driver')
       .where(
-        'ST_DWithin(driver.location, ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326), :radius) AND driver.status = :status',
+        'ST_DWithin(driver.location, ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326), :radius) AND driver.status = :status'
       )
       .andWhere('driver.location IS NOT NULL')
       .setParameters({

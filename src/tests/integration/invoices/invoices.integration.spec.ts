@@ -12,10 +12,7 @@ describe('Invoices Integration', () => {
   beforeAll(async () => {
     try {
       const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [
-          AppModule,
-          TypeOrmModule.forRoot(typeOrmTestConfig),
-        ],
+        imports: [AppModule, TypeOrmModule.forRoot(typeOrmTestConfig)],
       }).compile();
 
       app = moduleFixture.createNestApplication();

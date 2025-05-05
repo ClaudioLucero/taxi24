@@ -5,9 +5,9 @@ import { CreateTripDto } from '../../../infrastructure/dtos/trip.dto';
 
 @Injectable()
 export class CreateTripUseCase {
- constructor(private readonly tripRepository: TripRepository) {}
+  constructor(private readonly tripRepository: TripRepository) {}
 
- async execute(dto: CreateTripDto): Promise<Trip> {
- return this.tripRepository.create(dto);
- }
+  async execute(dto: CreateTripDto): Promise<Trip> {
+    return this.tripRepository.create(dto);
+  }
 }

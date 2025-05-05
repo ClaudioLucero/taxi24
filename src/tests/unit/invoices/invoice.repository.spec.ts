@@ -5,7 +5,10 @@ import { InvoiceRepository } from '../../../infrastructure/repositories/invoice.
 import { TripRepository } from '../../../infrastructure/repositories/trip.repository';
 import { Invoice } from '../../../domain/entities/invoice.entity';
 import { Trip } from '../../../domain/entities/trip.entity';
-import { CreateInvoiceDto, InvoiceFiltersDto } from '../../../infrastructure/dtos/invoice.dto';
+import {
+  CreateInvoiceDto,
+  InvoiceFiltersDto,
+} from '../../../infrastructure/dtos/invoice.dto';
 import { NotFoundException } from '@nestjs/common';
 
 describe('InvoiceRepository', () => {
@@ -29,7 +32,9 @@ describe('InvoiceRepository', () => {
     }).compile();
 
     repository = module.get<InvoiceRepository>(InvoiceRepository);
-    typeOrmRepository = module.get<Repository<Invoice>>(getRepositoryToken(Invoice));
+    typeOrmRepository = module.get<Repository<Invoice>>(
+      getRepositoryToken(Invoice)
+    );
     tripRepository = module.get<TripRepository>(TripRepository);
   });
 
@@ -39,12 +44,16 @@ describe('InvoiceRepository', () => {
 
   describe('findAll', () => {
     it('should return a list of invoices with filters', async () => {
-      const filters: InvoiceFiltersDto = { passengerId: '550e8400-e29b-41d4-a716-446655440004', page: 1, limit: 10 };
+      const filters: InvoiceFiltersDto = {
+        passengerId: '550e8400-e29b-41d4-a716-446655440004',
+        page: 1,
+        limit: 10,
+      };
       const invoices: Invoice[] = [
         {
           id: '550e8400-e29b-41d4-a716-446655440007',
           trip_id: '550e8400-e29b-41d4-a716-446655440006',
-          amount: 20.00,
+          amount: 20.0,
           created_at: new Date(),
           trip: {
             id: '550e8400-e29b-41d4-a716-446655440006',
@@ -62,12 +71,16 @@ describe('InvoiceRepository', () => {
         skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValue([invoices, invoices.length]),
+        getManyAndCount: jest
+          .fn()
+          .mockResolvedValue([invoices, invoices.length]),
       } as any);
 
       const result = await repository.findAll(filters);
       expect(result).toEqual({ invoices, total: invoices.length });
-      expect(typeOrmRepository.createQueryBuilder).toHaveBeenCalledWith('invoice');
+      expect(typeOrmRepository.createQueryBuilder).toHaveBeenCalledWith(
+        'invoice'
+      );
     });
   });
 
@@ -76,7 +89,7 @@ describe('InvoiceRepository', () => {
       const invoice: Invoice = {
         id: '550e8400-e29b-41d4-a716-446655440007',
         trip_id: '550e8400-e29b-41d4-a716-446655440006',
-        amount: 20.00,
+        amount: 20.0,
         created_at: new Date(),
         trip: {
           id: '550e8400-e29b-41d4-a716-446655440006',
@@ -89,7 +102,9 @@ describe('InvoiceRepository', () => {
       };
       jest.spyOn(typeOrmRepository, 'findOne').mockResolvedValue(invoice);
 
-      const result = await repository.findById('550e8400-e29b-41d4-a716-446655440007');
+      const result = await repository.findById(
+        '550e8400-e29b-41d4-a716-446655440007'
+      );
       expect(result).toEqual(invoice);
       expect(typeOrmRepository.findOne).toHaveBeenCalledWith({
         where: { id: '550e8400-e29b-41d4-a716-446655440007' },
@@ -100,7 +115,9 @@ describe('InvoiceRepository', () => {
     it('should return null if invoice not found', async () => {
       jest.spyOn(typeOrmRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await repository.findById('550e8400-e29b-41d4-a716-999999999999');
+      const result = await repository.findById(
+        '550e8400-e29b-41d4-a716-999999999999'
+      );
       expect(result).toBeNull();
       expect(typeOrmRepository.findOne).toHaveBeenCalledWith({
         where: { id: '550e8400-e29b-41d4-a716-999999999999' },
@@ -114,7 +131,7 @@ describe('InvoiceRepository', () => {
       const invoice: Invoice = {
         id: '550e8400-e29b-41d4-a716-446655440007',
         trip_id: '550e8400-e29b-41d4-a716-446655440006',
-        amount: 20.00,
+        amount: 20.0,
         created_at: new Date(),
         trip: {
           id: '550e8400-e29b-41d4-a716-446655440006',
@@ -127,7 +144,9 @@ describe('InvoiceRepository', () => {
       };
       jest.spyOn(typeOrmRepository, 'findOne').mockResolvedValue(invoice);
 
-      const result = await repository.findByTripId('550e8400-e29b-41d4-a716-446655440006');
+      const result = await repository.findByTripId(
+        '550e8400-e29b-41d4-a716-446655440006'
+      );
       expect(result).toEqual(invoice);
       expect(typeOrmRepository.findOne).toHaveBeenCalledWith({
         where: { trip_id: '550e8400-e29b-41d4-a716-446655440006' },
@@ -138,7 +157,9 @@ describe('InvoiceRepository', () => {
     it('should return null if no invoice found for trip', async () => {
       jest.spyOn(typeOrmRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await repository.findByTripId('550e8400-e29b-41d4-a716-999999999999');
+      const result = await repository.findByTripId(
+        '550e8400-e29b-41d4-a716-999999999999'
+      );
       expect(result).toBeNull();
       expect(typeOrmRepository.findOne).toHaveBeenCalledWith({
         where: { trip_id: '550e8400-e29b-41d4-a716-999999999999' },
@@ -151,7 +172,7 @@ describe('InvoiceRepository', () => {
     it('should create an invoice', async () => {
       const dto: CreateInvoiceDto = {
         trip_id: '550e8400-e29b-41d4-a716-446655440006',
-        amount: 20.00,
+        amount: 20.0,
       };
       const trip: Trip = {
         id: '550e8400-e29b-41d4-a716-446655440006',
@@ -182,12 +203,12 @@ describe('InvoiceRepository', () => {
     it('should throw NotFoundException if trip not found', async () => {
       const dto: CreateInvoiceDto = {
         trip_id: '550e8400-e29b-41d4-a716-999999999999',
-        amount: 20.00,
+        amount: 20.0,
       };
       jest.spyOn(tripRepository, 'findById').mockResolvedValue(null);
 
       await expect(repository.create(dto)).rejects.toThrow(
-        new NotFoundException(`Trip with ID ${dto.trip_id} not found`),
+        new NotFoundException(`Trip with ID ${dto.trip_id} not found`)
       );
     });
   });

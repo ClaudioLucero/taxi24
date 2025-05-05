@@ -10,13 +10,20 @@ export class InvoiceRepository {
   constructor(
     @InjectRepository(Invoice)
     private readonly repository: Repository<Invoice>,
-    private readonly tripRepository: TripRepository,
-  ) {
-    console.log('InvoiceRepository initialized');
-  }
+    private readonly tripRepository: TripRepository
+  ) {}
 
-  async findAll(filters: InvoiceFiltersDto): Promise<{ invoices: Invoice[]; total: number }> {
-    const { passengerId, driverId, startDate, endDate, page = 1, limit = 100 } = filters;
+  async findAll(
+    filters: InvoiceFiltersDto
+  ): Promise<{ invoices: Invoice[]; total: number }> {
+    const {
+      passengerId,
+      driverId,
+      startDate,
+      endDate,
+      page = 1,
+      limit = 100,
+    } = filters;
     const query = this.repository
       .createQueryBuilder('invoice')
       .leftJoinAndSelect('invoice.trip', 'trip')
@@ -36,7 +43,10 @@ export class InvoiceRepository {
       query.andWhere('invoice.created_at <= :endDate', { endDate });
     }
 
-    query.skip((page - 1) * limit).take(limit).orderBy('invoice.created_at', 'DESC');
+    query
+      .skip((page - 1) * limit)
+      .take(limit)
+      .orderBy('invoice.created_at', 'DESC');
 
     const [invoices, total] = await query.getManyAndCount();
     return { invoices, total };

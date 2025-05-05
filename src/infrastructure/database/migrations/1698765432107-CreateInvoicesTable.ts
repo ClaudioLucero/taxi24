@@ -46,7 +46,7 @@ export class CreateInvoicesTable1698765432107 implements MigrationInterface {
           },
         ],
       }),
-      true,
+      true
     );
   }
 

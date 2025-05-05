@@ -3,10 +3,14 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class SeedTestData1698765432109 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Limpiar datos existentes
-    await queryRunner.query(`TRUNCATE TABLE invoices RESTART IDENTITY CASCADE;`);
+    await queryRunner.query(
+      `TRUNCATE TABLE invoices RESTART IDENTITY CASCADE;`
+    );
     await queryRunner.query(`TRUNCATE TABLE trips RESTART IDENTITY CASCADE;`);
     await queryRunner.query(`TRUNCATE TABLE drivers RESTART IDENTITY CASCADE;`);
-    await queryRunner.query(`TRUNCATE TABLE passengers RESTART IDENTITY CASCADE;`);
+    await queryRunner.query(
+      `TRUNCATE TABLE passengers RESTART IDENTITY CASCADE;`
+    );
 
     // Insertar pasajeros
     await queryRunner.query(`
@@ -43,9 +47,13 @@ export class SeedTestData1698765432109 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`TRUNCATE TABLE invoices RESTART IDENTITY CASCADE;`);
+    await queryRunner.query(
+      `TRUNCATE TABLE invoices RESTART IDENTITY CASCADE;`
+    );
     await queryRunner.query(`TRUNCATE TABLE trips RESTART IDENTITY CASCADE;`);
     await queryRunner.query(`TRUNCATE TABLE drivers RESTART IDENTITY CASCADE;`);
-    await queryRunner.query(`TRUNCATE TABLE passengers RESTART IDENTITY CASCADE;`);
+    await queryRunner.query(
+      `TRUNCATE TABLE passengers RESTART IDENTITY CASCADE;`
+    );
   }
 }

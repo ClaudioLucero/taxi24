@@ -7,7 +7,9 @@ import { InvoiceFiltersDto } from '../../../infrastructure/dtos/invoice.dto';
 export class ListInvoicesUseCase {
   constructor(private readonly invoiceRepository: InvoiceRepository) {}
 
-  async execute(filters: InvoiceFiltersDto): Promise<{ invoices: Invoice[]; total: number }> {
+  async execute(
+    filters: InvoiceFiltersDto
+  ): Promise<{ invoices: Invoice[]; total: number }> {
     return this.invoiceRepository.findAll(filters);
   }
 }

@@ -82,7 +82,7 @@ export class CreateTripsTable1698765432105 implements MigrationInterface {
           },
         ],
       }),
-      true,
+      true
     );
   }
 

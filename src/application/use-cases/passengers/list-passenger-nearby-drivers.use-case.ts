@@ -8,7 +8,7 @@ import { Driver } from '../../../domain/entities/driver.entity';
 export class ListPassengerNearbyDriversUseCase {
   constructor(
     private readonly passengerRepository: PassengerRepository,
-    private readonly listNearbyDriversUseCase: ListNearbyDriversUseCase,
+    private readonly listNearbyDriversUseCase: ListNearbyDriversUseCase
   ) {}
 
   async execute(passengerId: string): Promise<Driver[]> {
@@ -18,7 +18,7 @@ export class ListPassengerNearbyDriversUseCase {
     }
     const dto: NearbyDriversDto = {
       latitude: 40.7128, // Placeholder, ajustar según lógica real
-      longitude: -74.0060,
+      longitude: -74.006,
       radius: 3,
     };
     return this.listNearbyDriversUseCase.execute(dto);

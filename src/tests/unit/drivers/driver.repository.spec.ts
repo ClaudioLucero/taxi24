@@ -23,7 +23,9 @@ describe('DriverRepository', () => {
     }).compile();
 
     repository = module.get<DriverRepository>(DriverRepository);
-    typeOrmRepository = module.get<Repository<Driver>>(getRepositoryToken(Driver));
+    typeOrmRepository = module.get<Repository<Driver>>(
+      getRepositoryToken(Driver)
+    );
   });
 
   it('should be defined', () => {
@@ -66,7 +68,9 @@ describe('DriverRepository', () => {
 
       const result = await repository.findAvailable();
       expect(result).toEqual(drivers);
-      expect(typeOrmRepository.find).toHaveBeenCalledWith({ where: { status: DriverStatus.AVAILABLE } });
+      expect(typeOrmRepository.find).toHaveBeenCalledWith({
+        where: { status: DriverStatus.AVAILABLE },
+      });
     });
   });
 
@@ -82,20 +86,28 @@ describe('DriverRepository', () => {
           created_at: new Date(),
         },
       ];
-      const dto: NearbyDriversDto = { latitude: 40.7128, longitude: -74.0060, radius: 5 };
+      const dto: NearbyDriversDto = {
+        latitude: 40.7128,
+        longitude: -74.006,
+        radius: 5,
+      };
       const queryBuilder = {
         where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
         setParameters: jest.fn().mockReturnThis(),
         getMany: jest.fn().mockResolvedValue(drivers),
       };
-      jest.spyOn(typeOrmRepository, 'createQueryBuilder').mockReturnValue(queryBuilder as any);
+      jest
+        .spyOn(typeOrmRepository, 'createQueryBuilder')
+        .mockReturnValue(queryBuilder as any);
 
       const result = await repository.findNearby(dto);
       expect(result).toEqual(drivers);
-      expect(typeOrmRepository.createQueryBuilder).toHaveBeenCalledWith('driver');
+      expect(typeOrmRepository.createQueryBuilder).toHaveBeenCalledWith(
+        'driver'
+      );
       expect(queryBuilder.where).toHaveBeenCalledWith(
-        'ST_DWithin(driver.location, ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326), :radius) AND driver.status = :status',
+        'ST_DWithin(driver.location, ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326), :radius) AND driver.status = :status'
       );
       expect(queryBuilder.setParameters).toHaveBeenCalledWith({
         latitude: dto.latitude,
@@ -113,9 +125,15 @@ describe('DriverRepository', () => {
     });
 
     it('should throw BadRequestException for invalid coordinates', async () => {
-      const dto: NearbyDriversDto = { latitude: NaN, longitude: -74.0060, radius: 5 };
+      const dto: NearbyDriversDto = {
+        latitude: NaN,
+        longitude: -74.006,
+        radius: 5,
+      };
 
-      await expect(repository.findNearby(dto)).rejects.toThrow(BadRequestException);
+      await expect(repository.findNearby(dto)).rejects.toThrow(
+        BadRequestException
+      );
     });
   });
 
@@ -131,28 +149,41 @@ describe('DriverRepository', () => {
       };
       jest.spyOn(typeOrmRepository, 'findOne').mockResolvedValue(driver);
 
-      const result = await repository.findById('550e8400-e29b-41d4-a716-446655440000');
+      const result = await repository.findById(
+        '550e8400-e29b-41d4-a716-446655440000'
+      );
       expect(result).toEqual(driver);
-      expect(typeOrmRepository.findOne).toHaveBeenCalledWith({ where: { id: '550e8400-e29b-41d4-a716-446655440000' } });
+      expect(typeOrmRepository.findOne).toHaveBeenCalledWith({
+        where: { id: '550e8400-e29b-41d4-a716-446655440000' },
+      });
     });
 
     it('should return null if driver not found', async () => {
       jest.spyOn(typeOrmRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await repository.findById('550e8400-e29b-41d4-a716-999999999999');
+      const result = await repository.findById(
+        '550e8400-e29b-41d4-a716-999999999999'
+      );
       expect(result).toBeNull();
-      expect(typeOrmRepository.findOne).toHaveBeenCalledWith({ where: { id: '550e8400-e29b-41d4-a716-999999999999' } });
+      expect(typeOrmRepository.findOne).toHaveBeenCalledWith({
+        where: { id: '550e8400-e29b-41d4-a716-999999999999' },
+      });
     });
   });
 
   describe('updateStatus', () => {
     it('should update driver status', async () => {
-      jest.spyOn(typeOrmRepository, 'update').mockResolvedValue({ affected: 1 } as any);
+      jest
+        .spyOn(typeOrmRepository, 'update')
+        .mockResolvedValue({ affected: 1 } as any);
 
-      await repository.updateStatus('550e8400-e29b-41d4-a716-446655440000', DriverStatus.BUSY);
+      await repository.updateStatus(
+        '550e8400-e29b-41d4-a716-446655440000',
+        DriverStatus.BUSY
+      );
       expect(typeOrmRepository.update).toHaveBeenCalledWith(
         { id: '550e8400-e29b-41d4-a716-446655440000' },
-        { status: DriverStatus.BUSY },
+        { status: DriverStatus.BUSY }
       );
     });
   });

@@ -10,15 +10,19 @@ import { Invoice } from '../../domain/entities/invoice.entity';
 export class InvoicesController {
   constructor(
     private readonly listInvoicesUseCase: ListInvoicesUseCase,
-    private readonly getTripInvoiceUseCase: GetTripInvoiceUseCase,
-  ) {
-    console.log('InvoicesController initialized');
-  }
+    private readonly getTripInvoiceUseCase: GetTripInvoiceUseCase
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'List invoices with filters' })
-  @ApiResponse({ status: 200, description: 'List of invoices', type: [Invoice] })
-  async listInvoices(@Query() filters: InvoiceFiltersDto): Promise<{ invoices: Invoice[]; total: number }> {
+  @ApiResponse({
+    status: 200,
+    description: 'List of invoices',
+    type: [Invoice],
+  })
+  async listInvoices(
+    @Query() filters: InvoiceFiltersDto
+  ): Promise<{ invoices: Invoice[]; total: number }> {
     return this.listInvoicesUseCase.execute(filters);
   }
 }

@@ -1,11 +1,23 @@
-import { Controller, Get, Post, Patch, Param, Body, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Param,
+  Body,
+  Query,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ListTripsUseCase } from '../../application/use-cases/trips/list-trips.use-case';
 import { GetTripUseCase } from '../../application/use-cases/trips/get-trip.use-case';
 import { CreateTripUseCase } from '../../application/use-cases/trips/create-trip.use-case';
 import { CompleteTripUseCase } from '../../application/use-cases/trips/complete-trip.use-case';
 import { GetTripInvoiceUseCase } from '../../application/use-cases/invoices/get-trip-invoice.use-case';
-import { CreateTripDto, CompleteTripDto, ListTripsQueryDto } from '../dtos/trip.dto';
+import {
+  CreateTripDto,
+  CompleteTripDto,
+  ListTripsQueryDto,
+} from '../dtos/trip.dto';
 import { Invoice } from '../../domain/entities/invoice.entity';
 import { Trip } from '../../domain/entities/trip.entity';
 
@@ -17,15 +29,15 @@ export class TripsController {
     private readonly getTripUseCase: GetTripUseCase,
     private readonly createTripUseCase: CreateTripUseCase,
     private readonly completeTripUseCase: CompleteTripUseCase,
-    private readonly getTripInvoiceUseCase: GetTripInvoiceUseCase,
-  ) {
-    console.log('PassengersController initialized');
-  }
+    private readonly getTripInvoiceUseCase: GetTripInvoiceUseCase
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'List all trips with pagination' })
   @ApiResponse({ status: 200, description: 'List of trips', type: [Trip] })
-  async findAll(@Query() query: ListTripsQueryDto): Promise<{ trips: Trip[]; total: number }> {
+  async findAll(
+    @Query() query: ListTripsQueryDto
+  ): Promise<{ trips: Trip[]; total: number }> {
     return this.listTripsUseCase.execute(query);
   }
 
@@ -48,7 +60,10 @@ export class TripsController {
   @ApiOperation({ summary: 'Complete a trip' })
   @ApiResponse({ status: 200, description: 'Trip completed', type: Trip })
   @ApiResponse({ status: 404, description: 'Trip not found' })
-  async complete(@Param('id') id: string, @Body() dto: CompleteTripDto): Promise<Trip> {
+  async complete(
+    @Param('id') id: string,
+    @Body() dto: CompleteTripDto
+  ): Promise<Trip> {
     return this.completeTripUseCase.execute(id, dto);
   }
 

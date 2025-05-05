@@ -41,10 +41,16 @@ describe('PassengersController', () => {
     }).compile();
 
     controller = module.get<PassengersController>(PassengersController);
-    listPassengersUseCase = module.get<ListPassengersUseCase>(ListPassengersUseCase);
+    listPassengersUseCase = module.get<ListPassengersUseCase>(
+      ListPassengersUseCase
+    );
     getPassengerUseCase = module.get<GetPassengerUseCase>(GetPassengerUseCase);
-    createPassengerUseCase = module.get<CreatePassengerUseCase>(CreatePassengerUseCase);
-    listNearbyDriversUseCase = module.get<ListNearbyDriversUseCase>(ListNearbyDriversUseCase);
+    createPassengerUseCase = module.get<CreatePassengerUseCase>(
+      CreatePassengerUseCase
+    );
+    listNearbyDriversUseCase = module.get<ListNearbyDriversUseCase>(
+      ListNearbyDriversUseCase
+    );
   });
 
   it('should be defined', () => {
@@ -61,7 +67,9 @@ describe('PassengersController', () => {
           created_at: new Date(),
         },
       ];
-      jest.spyOn(listPassengersUseCase, 'execute').mockResolvedValue(passengers);
+      jest
+        .spyOn(listPassengersUseCase, 'execute')
+        .mockResolvedValue(passengers);
 
       const result = await controller.findAll();
       expect(result).toEqual(passengers);
@@ -79,30 +87,45 @@ describe('PassengersController', () => {
       };
       jest.spyOn(getPassengerUseCase, 'execute').mockResolvedValue(passenger);
 
-      const result = await controller.findById('550e8400-e29b-41d4-a716-446655440003');
+      const result = await controller.findById(
+        '550e8400-e29b-41d4-a716-446655440003'
+      );
       expect(result).toEqual(passenger);
-      expect(getPassengerUseCase.execute).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-446655440003');
+      expect(getPassengerUseCase.execute).toHaveBeenCalledWith(
+        '550e8400-e29b-41d4-a716-446655440003'
+      );
     });
 
     it('should throw NotFoundException if passenger not found', async () => {
-      jest.spyOn(getPassengerUseCase, 'execute').mockRejectedValue(
-        new NotFoundException('Passenger with ID 550e8400-e29b-41d4-a716-999999999999 not found'),
-      );
+      jest
+        .spyOn(getPassengerUseCase, 'execute')
+        .mockRejectedValue(
+          new NotFoundException(
+            'Passenger with ID 550e8400-e29b-41d4-a716-999999999999 not found'
+          )
+        );
 
-      await expect(controller.findById('550e8400-e29b-41d4-a716-999999999999')).rejects.toThrow(NotFoundException);
+      await expect(
+        controller.findById('550e8400-e29b-41d4-a716-999999999999')
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('create', () => {
     it('should create a new passenger', async () => {
-      const dto: CreatePassengerDto = { name: 'Test Passenger', phone: '1234567890' };
+      const dto: CreatePassengerDto = {
+        name: 'Test Passenger',
+        phone: '1234567890',
+      };
       const passenger: Passenger = {
         id: '550e8400-e29b-41d4-a716-446655440006',
         name: dto.name,
         phone: dto.phone,
         created_at: new Date(),
       };
-      jest.spyOn(createPassengerUseCase, 'execute').mockResolvedValue(passenger);
+      jest
+        .spyOn(createPassengerUseCase, 'execute')
+        .mockResolvedValue(passenger);
 
       const result = await controller.create(dto);
       expect(result).toEqual(passenger);
@@ -130,21 +153,29 @@ describe('PassengersController', () => {
         },
       ];
       jest.spyOn(getPassengerUseCase, 'execute').mockResolvedValue(passenger);
-      jest.spyOn(listNearbyDriversUseCase, 'execute').mockResolvedValue(drivers);
+      jest
+        .spyOn(listNearbyDriversUseCase, 'execute')
+        .mockResolvedValue(drivers);
 
       const result = await controller.findNearbyDrivers(passengerId);
       expect(result).toEqual(drivers);
       expect(getPassengerUseCase.execute).toHaveBeenCalledWith(passengerId);
-      expect(listNearbyDriversUseCase.execute).toHaveBeenCalledWith(expect.any(Object));
+      expect(listNearbyDriversUseCase.execute).toHaveBeenCalledWith(
+        expect.any(Object)
+      );
     });
 
     it('should throw NotFoundException if passenger not found', async () => {
       const passengerId = '550e8400-e29b-41d4-a716-999999999999';
-      jest.spyOn(getPassengerUseCase, 'execute').mockRejectedValue(
-        new NotFoundException(`Passenger with ID ${passengerId} not found`),
-      );
+      jest
+        .spyOn(getPassengerUseCase, 'execute')
+        .mockRejectedValue(
+          new NotFoundException(`Passenger with ID ${passengerId} not found`)
+        );
 
-      await expect(controller.findNearbyDrivers(passengerId)).rejects.toThrow(NotFoundException);
+      await expect(controller.findNearbyDrivers(passengerId)).rejects.toThrow(
+        NotFoundException
+      );
     });
   });
 });

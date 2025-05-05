@@ -12,10 +12,7 @@ describe('Passengers Integration', () => {
   beforeAll(async () => {
     try {
       const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [
-          AppModule,
-          TypeOrmModule.forRoot(typeOrmTestConfig),
-        ],
+        imports: [AppModule, TypeOrmModule.forRoot(typeOrmTestConfig)],
       }).compile();
 
       app = moduleFixture.createNestApplication();
@@ -89,6 +86,10 @@ describe('Passengers Integration', () => {
       .get(`/passengers/${passengerId}/nearby-drivers`)
       .expect(200);
     expect(response.body).toBeInstanceOf(Array);
-    expect(response.body.every((driver: { status: string; }) => driver.status === 'available')).toBe(true);
+    expect(
+      response.body.every(
+        (driver: { status: string }) => driver.status === 'available'
+      )
+    ).toBe(true);
   });
 });

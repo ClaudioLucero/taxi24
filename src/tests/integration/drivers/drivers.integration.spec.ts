@@ -13,10 +13,7 @@ describe('Drivers Integration', () => {
   beforeAll(async () => {
     try {
       const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [
-          AppModule,
-          TypeOrmModule.forRoot(typeOrmTestConfig),
-        ],
+        imports: [AppModule, TypeOrmModule.forRoot(typeOrmTestConfig)],
       }).compile();
 
       app = moduleFixture.createNestApplication();
@@ -55,13 +52,17 @@ describe('Drivers Integration', () => {
       .get('/drivers/available')
       .expect(200);
     expect(response.body).toBeInstanceOf(Array);
-    expect((response.body as Driver[]).every(driver => driver.status === 'available')).toBe(true);
+    expect(
+      (response.body as Driver[]).every(
+        (driver) => driver.status === 'available'
+      )
+    ).toBe(true);
   });
 
   it('should list nearby drivers', async () => {
     const response = await request(app.getHttpServer())
       .get('/drivers/nearby')
-      .query({ latitude: 40.7128, longitude: -74.0060, radius: 3 })
+      .query({ latitude: 40.7128, longitude: -74.006, radius: 3 })
       .expect(200);
     expect(response.body).toBeInstanceOf(Array);
     expect(response.body.length).toBeGreaterThan(0);
@@ -78,14 +79,14 @@ describe('Drivers Integration', () => {
   it('should return 400 for invalid latitude', async () => {
     await request(app.getHttpServer())
       .get('/drivers/nearby')
-      .query({ latitude: 'invalid', longitude: -74.0060, radius: 3 })
+      .query({ latitude: 'invalid', longitude: -74.006, radius: 3 })
       .expect(400);
   });
 
   it('should return 400 for negative radius', async () => {
     await request(app.getHttpServer())
       .get('/drivers/nearby')
-      .query({ latitude: 40.7128, longitude: -74.0060, radius: -1 })
+      .query({ latitude: 40.7128, longitude: -74.006, radius: -1 })
       .expect(400);
   });
 });

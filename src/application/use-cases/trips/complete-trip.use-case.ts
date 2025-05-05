@@ -8,7 +8,7 @@ import { CompleteTripDto } from '../../../infrastructure/dtos/trip.dto';
 export class CompleteTripUseCase {
   constructor(
     private readonly tripRepository: TripRepository,
-    private readonly invoiceRepository: InvoiceRepository,
+    private readonly invoiceRepository: InvoiceRepository
   ) {}
 
   async execute(id: string, dto: CompleteTripDto): Promise<Trip> {

@@ -21,7 +21,9 @@ describe('PassengerRepository', () => {
     }).compile();
 
     repository = module.get<PassengerRepository>(PassengerRepository);
-    typeOrmRepository = module.get<Repository<Passenger>>(getRepositoryToken(Passenger));
+    typeOrmRepository = module.get<Repository<Passenger>>(
+      getRepositoryToken(Passenger)
+    );
   });
 
   it('should be defined', () => {
@@ -56,7 +58,9 @@ describe('PassengerRepository', () => {
       };
       jest.spyOn(typeOrmRepository, 'findOne').mockResolvedValue(passenger);
 
-      const result = await repository.findById('550e8400-e29b-41d4-a716-446655440003');
+      const result = await repository.findById(
+        '550e8400-e29b-41d4-a716-446655440003'
+      );
       expect(result).toEqual(passenger);
       expect(typeOrmRepository.findOne).toHaveBeenCalledWith({
         where: { id: '550e8400-e29b-41d4-a716-446655440003' },
@@ -65,14 +69,18 @@ describe('PassengerRepository', () => {
 
     it('should throw BadRequestException for invalid UUID', async () => {
       await expect(repository.findById('invalid-id')).rejects.toThrow(
-        new BadRequestException('Invalid UUID format for passenger ID: invalid-id'),
+        new BadRequestException(
+          'Invalid UUID format for passenger ID: invalid-id'
+        )
       );
     });
 
     it('should return null if passenger not found with valid UUID', async () => {
       jest.spyOn(typeOrmRepository, 'findOne').mockResolvedValue(null);
 
-      const result = await repository.findById('550e8400-e29b-41d4-a716-999999999999');
+      const result = await repository.findById(
+        '550e8400-e29b-41d4-a716-999999999999'
+      );
       expect(result).toBeNull();
       expect(typeOrmRepository.findOne).toHaveBeenCalledWith({
         where: { id: '550e8400-e29b-41d4-a716-999999999999' },

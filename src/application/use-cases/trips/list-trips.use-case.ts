@@ -7,7 +7,9 @@ import { ListTripsQueryDto } from '../../../infrastructure/dtos/trip.dto';
 export class ListTripsUseCase {
   constructor(private readonly tripRepository: TripRepository) {}
 
-  async execute(query: ListTripsQueryDto): Promise<{ trips: Trip[]; total: number }> {
+  async execute(
+    query: ListTripsQueryDto
+  ): Promise<{ trips: Trip[]; total: number }> {
     return this.tripRepository.findAll(query);
   }
 }
