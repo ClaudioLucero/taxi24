@@ -1,15 +1,18 @@
 import { DataSource } from 'typeorm';
 import { join } from 'path';
 import * as dotenv from 'dotenv';
+import { Driver } from '../../domain/entities/driver.entity';
+import { Passenger } from '../../domain/entities/passenger.entity';
+import { Trip } from '../../domain/entities/trip.entity';
+import { Invoice } from '../../domain/entities/invoice.entity';
 
 dotenv.config();
 
-export const AppTestDataSource = new DataSource({
+export const AppDataSource = new DataSource({
   type: 'postgres',
-  url: process.env.TEST_DATABASE_URL,
-  entities: [join(__dirname, '../../domain/entities/*.entity{.ts,.js}')],
-  migrations: [join(__dirname, './migrations/*{.ts,.js}')],
+  url: process.env.DATABASE_URL,
+  entities: [Driver, Passenger, Trip, Invoice],
+  migrations: [join(__dirname, './migrations/*.ts')],
   synchronize: false,
-  migrationsRun: true,
   logging: ['error', 'warn'],
 });

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { Driver } from './domain/entities/driver.entity';
 import { Passenger } from './domain/entities/passenger.entity';
 import { Trip } from './domain/entities/trip.entity';
@@ -29,9 +30,25 @@ import { ListInvoicesUseCase } from './application/use-cases/invoices/list-invoi
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
+      entities: [Driver, Passenger, Trip, Invoice],
+      synchronize: false,
+      logging: ['error', 'warn'],
+    }),
     TypeOrmModule.forFeature([Driver, Passenger, Trip, Invoice]),
   ],
-  controllers: [DriversController, PassengersController, TripsController, InvoicesController],
+  controllers: [
+    DriversController,
+    PassengersController,
+    TripsController,
+    InvoicesController,
+  ],
   providers: [
     DriverRepository,
     PassengerRepository,
