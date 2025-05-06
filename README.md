@@ -112,7 +112,6 @@ npm run migration:run:test
 | GET    | `/drivers/nearby?latitude=LAT&longitude=LNG&radius=KM` | Conductores cercanos a una ubicación    |
 | POST   | `/trips`                                               | Crear un nuevo viaje                    |
 | PATCH  | `/trips/:id/complete`                                  | Completar viaje y generar factura       |
-| GET    | `/trips/active`                                        | Listar viajes activos                   |
 | GET    | `/passengers`                                          | Listar todos los pasajeros              |
 | GET    | `/passengers/:id`                                      | Obtener detalles de un pasajero         |
 | GET    | `/passengers/:id/nearby-drivers`                       | Buscar conductores cercanos al pasajero |
