@@ -72,6 +72,7 @@ THROTTLE_LIMIT=100
 
 
 4. Configurar la base de datos
+```bash
 Asegúrate de tener PostgreSQL corriendo. Luego:
 -- Habilitar PostGIS
 CREATE EXTENSION IF NOT EXISTS postgis;
@@ -79,20 +80,29 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 -- Crear bases de datos
 CREATE DATABASE taxi24;
 CREATE DATABASE taxi24_test;
+```
 
 5. Ejecutar migraciones
 
 Ejecución
 Modo desarrollo
-npm run start:dev
+```bash
 
- Endpoints Principales
+npm run start:dev
+```
+ 
  # Migraciones para base principal
+ ```bash
 npm run migration:run
+```
 
 # Migraciones para entorno de pruebas
+```bash
 npm run migration:run:test
+```
 
+
+ Endpoints Principales
 
 
 | Método | Endpoint                                               | Descripción                             |
