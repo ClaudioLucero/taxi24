@@ -1,5 +1,7 @@
 # 🚖 Taxi24 API
 
+# 🚖 Taxi24 API
+
 **Taxi24** es una API RESTful diseñada para una startup que ofrece una solución *white label* para la gestión de flotas de transporte. Permite a otras empresas administrar conductores, pasajeros, viajes y facturas mediante endpoints públicos sin autenticación.
 
 Desarrollada con **NestJS**, **TypeScript**, **PostgreSQL** y **PostGIS**, esta API soporta cálculos geoespaciales para encontrar conductores cercanos y sigue los principios de **Clean Architecture** para mantener la escalabilidad y mantenibilidad.
@@ -31,19 +33,64 @@ Desarrollada con **NestJS**, **TypeScript**, **PostgreSQL** y **PostGIS**, esta 
   - Obtener detalles por ID
   - Buscar conductores cercanos a un pasajero
 
+- **Facturas**
+  - Consultar factura por ID de viaje
+  - Filtrar facturas por pasajero, conductor o rango de fechas
+
+- **Documentación interactiva con Swagger**:  
+  Disponible en [`/api-docs`](http://localhost:3000/api-docs)
+
+---
+
+## ⚙️ Instalación y Configuración
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/ClaudioLucero/taxi24.git
+cd taxi24
+```
+2. Instalar dependencias
+npm install
+
+3. Configurar variables de entorno
+Crea un archivo .env en la raíz del proyecto:
+
+   # Base de datos principal
+DATABASE_URL=postgresql://taxi24:taxi24@localhost:5433/taxi24
+
+# Base de datos para pruebas
+TEST_DATABASE_URL=postgresql://taxi24:taxi24@localhost:5433/taxi24_test
+
+# Puerto de la API
+PORT=3000
+
+# Límite de peticiones (Throttle)
+THROTTLE_TTL=60
+THROTTLE_LIMIT=100
+
+4. Configurar la base de datos
+Asegúrate de tener PostgreSQL corriendo. Luego:
+-- Habilitar PostGIS
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+-- Crear bases de datos
+CREATE DATABASE taxi24;
+CREATE DATABASE taxi24_test;
+
 5. Ejecutar migraciones
-# Migraciones para base principal
-npm run migration:run
-
-# Migraciones para entorno de pruebas
-npm run migration:run:test
-
 
 Ejecución
 Modo desarrollo
 npm run start:dev
 
  Endpoints Principales
+ # Migraciones para base principal
+npm run migration:run
+
+# Migraciones para entorno de pruebas
+npm run migration:run:test
+
 
 
 | Método | Endpoint                                               | Descripción                             |
