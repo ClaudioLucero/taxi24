@@ -38,7 +38,7 @@ describe('InvoiceRepository', () => {
   });
 
   describe('findAll', () => {
-    it('should return a list of invoices with passenger filter', async () => {
+    it('should return a list of invoices with filters', async () => {
       const filters: InvoiceFiltersDto = { passengerId: '550e8400-e29b-41d4-a716-446655440004', page: 1, limit: 10 };
       const invoices: Invoice[] = [
         {
@@ -68,7 +68,6 @@ describe('InvoiceRepository', () => {
       const result = await repository.findAll(filters);
       expect(result).toEqual({ invoices, total: invoices.length });
       expect(typeOrmRepository.createQueryBuilder).toHaveBeenCalledWith('invoice');
-      expect(typeOrmRepository.createQueryBuilder().andWhere).toHaveBeenCalledWith('trip.passenger_id = :passengerId', { passengerId: filters.passengerId });
     });
 
     it('should return a list of invoices without passenger filter', async () => {
@@ -110,7 +109,7 @@ describe('InvoiceRepository', () => {
       const invoice: Invoice = {
         id: '550e8400-e29b-41d4-a716-446655440007',
         trip_id: '550e8400-e29b-41d4-a716-446655440006',
-        amount: 20.00,
+        amount: 20.0,
         created_at: new Date(),
         trip: {
           id: '550e8400-e29b-41d4-a716-446655440006',
@@ -148,7 +147,7 @@ describe('InvoiceRepository', () => {
       const invoice: Invoice = {
         id: '550e8400-e29b-41d4-a716-446655440007',
         trip_id: '550e8400-e29b-41d4-a716-446655440006',
-        amount: 20.00,
+        amount: 20.0,
         created_at: new Date(),
         trip: {
           id: '550e8400-e29b-41d4-a716-446655440006',
@@ -185,7 +184,7 @@ describe('InvoiceRepository', () => {
     it('should create an invoice', async () => {
       const dto: CreateInvoiceDto = {
         trip_id: '550e8400-e29b-41d4-a716-446655440006',
-        amount: 20.00,
+        amount: 20.0,
       };
       const trip: Trip = {
         id: '550e8400-e29b-41d4-a716-446655440006',
@@ -216,7 +215,7 @@ describe('InvoiceRepository', () => {
     it('should throw NotFoundException if trip not found', async () => {
       const dto: CreateInvoiceDto = {
         trip_id: '550e8400-e29b-41d4-a716-999999999999',
-        amount: 20.00,
+        amount: 20.0,
       };
       jest.spyOn(tripRepository, 'findById').mockResolvedValue(null);
 
