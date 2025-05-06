@@ -1,4 +1,3 @@
-Descripción
 Taxi24 es una API RESTful diseñada para una startup que ofrece una solución de marca blanca para gestionar flotas de transporte. Permite a otras empresas administrar conductores, pasajeros, viajes y facturas a través de endpoints accesibles sin autenticación. Desarrollada con NestJS, TypeScript, PostgreSQL y PostGIS, la API soporta cálculos geoespaciales para encontrar conductores cercanos y sigue Clean Architecture para garantizar mantenibilidad y escalabilidad.
 Funcionalidades Principales
 Conductores: Listar todos los conductores, los disponibles, y los cercanos a una ubicación (radio de 3 km).
