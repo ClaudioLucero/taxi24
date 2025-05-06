@@ -1,3 +1,4 @@
+// src/tests/unit/trips/trip.repository.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -51,9 +52,9 @@ describe('TripRepository', () => {
   });
 
   describe('findAll', () => {
-    it('should return a list of trips', async () => {
+    it('should return a list of trips with pagination meta', async () => {
       const query: ListTripsQueryDto = { page: 1, limit: 10 };
-      const trips: Trip[] = [
+      const items: Trip[] = [
         {
           id: '550e8400-e29b-41d4-a716-446655440005',
           passenger_id: '550e8400-e29b-41d4-a716-446655440003',
@@ -63,17 +64,28 @@ describe('TripRepository', () => {
           completed_at: undefined,
         },
       ];
-      jest.spyOn(typeOrmRepository, 'findAndCount').mockResolvedValue([trips, trips.length]);
+      jest.spyOn(typeOrmRepository, 'createQueryBuilder').mockReturnValue({
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        cache: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([items, items.length]),
+      } as any);
 
       const result = await repository.findAll(query);
-      const page = query.page ?? 1;
-      const limit = query.limit ?? 100;
-      expect(result).toEqual({ trips, total: trips.length });
-      expect(typeOrmRepository.findAndCount).toHaveBeenCalledWith({
-        relations: ['driver', 'passenger'],
-        skip: (page - 1) * limit,
-        take: limit,
+      expect(result).toEqual({
+        items,
+        meta: {
+          total: items.length,
+          page: query.page || 1,
+          limit: query.limit || 10,
+          totalPages: Math.ceil(items.length / (query.limit || 10)),
+        },
       });
+      expect(typeOrmRepository.createQueryBuilder).toHaveBeenCalledWith('trip');
+      expect(typeOrmRepository.createQueryBuilder().skip).toHaveBeenCalledWith(0);
+      expect(typeOrmRepository.createQueryBuilder().take).toHaveBeenCalledWith(query.limit);
     });
   });
 

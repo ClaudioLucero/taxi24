@@ -14,7 +14,9 @@ describe('GetInvoiceUseCase', () => {
         GetInvoiceUseCase,
         {
           provide: InvoiceRepository,
-          useValue: { findById: jest.fn() },
+          useValue: {
+            findById: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -54,8 +56,9 @@ describe('GetInvoiceUseCase', () => {
       jest.spyOn(invoiceRepository, 'findById').mockResolvedValue(null);
 
       await expect(useCase.execute('550e8400-e29b-41d4-a716-999999999999')).rejects.toThrow(
-        new NotFoundException(`Invoice with ID 550e8400-e29b-41d4-a716-999999999999 not found`),
+        new NotFoundException('Invoice not found'),
       );
+      expect(invoiceRepository.findById).toHaveBeenCalledWith('550e8400-e29b-41d4-a716-999999999999');
     });
   });
 });

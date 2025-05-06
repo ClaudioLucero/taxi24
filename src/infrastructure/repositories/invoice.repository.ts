@@ -1,3 +1,4 @@
+// src/infrastructure/repositories/invoice.repository.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -8,17 +9,15 @@ import { TripRepository } from './trip.repository';
 // Repositorio para gestionar operaciones de base de datos relacionadas con facturas, como crear, buscar por ID o filtrar por criterios como pasajero, conductor o fechas.
 @Injectable()
 export class InvoiceRepository {
-  // Inyecta el repositorio de TypeORM para la entidad Invoice y el repositorio de viajes
   constructor(
     @InjectRepository(Invoice)
     private readonly repository: Repository<Invoice>,
     private readonly tripRepository: TripRepository
   ) {}
 
-  // Obtiene una lista de facturas con filtros (pasajero, conductor, fechas) y paginación
   async findAll(
     filters: InvoiceFiltersDto
-  ): Promise<{ invoices: Invoice[]; total: number }> {
+  ): Promise<{ items: Invoice[]; meta: { total: number; page: number; limit: number; totalPages: number } }> {
     const {
       passengerId,
       driverId,
@@ -49,13 +48,23 @@ export class InvoiceRepository {
     query
       .skip((page - 1) * limit)
       .take(limit)
-      .orderBy('invoice.created_at', 'DESC');
+      .orderBy('invoice.created_at', 'DESC')
+      .cache(false);
 
-    const [invoices, total] = await query.getManyAndCount();
-    return { invoices, total };
+    const [items, total] = await query.getManyAndCount();
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      items,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+      },
+    };
   }
 
-  // Busca una factura por su ID, incluyendo datos relacionados del viaje, pasajero y conductor
   async findById(id: string): Promise<Invoice | null> {
     return this.repository.findOne({
       where: { id },
@@ -63,7 +72,6 @@ export class InvoiceRepository {
     });
   }
 
-  // Busca una factura por el ID del viaje asociado
   async findByTripId(tripId: string): Promise<Invoice | null> {
     return this.repository.findOne({
       where: { trip_id: tripId },
@@ -71,7 +79,6 @@ export class InvoiceRepository {
     });
   }
 
-  // Crea una nueva factura, verificando que el viaje asociado exista
   async create(dto: CreateInvoiceDto): Promise<Invoice> {
     const trip = await this.tripRepository.findById(dto.trip_id);
     if (!trip) {

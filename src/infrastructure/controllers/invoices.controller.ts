@@ -1,3 +1,4 @@
+// src/infrastructure/controllers/invoices.controller.ts
 import { Controller, Get, Query, Param } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,7 +24,7 @@ export class InvoicesController {
 
   // Endpoint para listar facturas aplicando filtros como pasajero, conductor o fechas
   @Get()
-  @ApiOperation({ summary: 'Listar facturas con filtros' })
+  @ApiOperation({ summary: 'Listar facturas con filtros y paginación' })
   @ApiQuery({
     name: 'passengerId',
     required: false,
@@ -56,21 +57,21 @@ export class InvoicesController {
     name: 'page',
     required: false,
     type: Number,
-    description: 'Número de página para paginación (mínimo 1).',
+    description: 'Número de página para paginación (mínimo 1, por defecto 1).',
     example: 1,
   })
   @ApiQuery({
     name: 'limit',
     required: false,
     type: Number,
-    description: 'Cantidad de registros por página (máximo 100).',
-    example: 100,
+    description: 'Cantidad de registros por página (mínimo 1, máximo 100, por defecto 100).',
+    example: 5,
   })
   @ApiResponse({
     status: 200,
-    description: 'Lista de facturas filtradas con el total de registros.',
+    description: 'Lista paginada de facturas filtradas con metadatos de paginación.',
     example: {
-      invoices: [
+      items: [
         {
           id: '550e8400-e29b-41d4-a716-446655440005',
           trip_id: '550e8400-e29b-41d4-a716-446655440004',
@@ -78,15 +79,20 @@ export class InvoicesController {
           created_at: '2025-05-06T12:00:00Z',
         },
       ],
-      total: 1,
+      meta: {
+        total: 50,
+        page: 1,
+        limit: 5,
+        totalPages: 10,
+      },
     },
   })
   @ApiBadRequestResponse({
-    description: 'Filtros inválidos (por ejemplo, fechas mal formateadas o UUIDs incorrectos).',
+    description: 'Filtros inválidos (por ejemplo, fechas mal formateadas, UUIDs incorrectos, o parámetros de paginación inválidos).',
   })
   async listInvoices(
     @Query() filters: InvoiceFiltersDto
-  ): Promise<{ invoices: Invoice[]; total: number }> {
+  ): Promise<{ items: Invoice[]; meta: { total: number; page: number; limit: number; totalPages: number } }> {
     return this.listInvoicesUseCase.execute(filters);
   }
 }
