@@ -1,6 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
+// Migración para poblar la tabla 'trips' con datos iniciales de ejemplo, insertando dos viajes con información como conductor, pasajero, ubicaciones, estado y costo.
 export class SeedTripsTable1698765432106 implements MigrationInterface {
+  // Inserta datos iniciales en la tabla 'trips' al ejecutar la migración
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       INSERT INTO trips (id, driver_id, passenger_id, start_location, end_location, status, cost, created_at)
@@ -10,6 +12,7 @@ export class SeedTripsTable1698765432106 implements MigrationInterface {
     `);
   }
 
+  // Revierte la migración eliminando los datos insertados en la tabla 'trips'
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       DELETE FROM trips WHERE id IN (

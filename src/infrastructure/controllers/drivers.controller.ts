@@ -6,15 +6,18 @@ import { ListNearbyDriversUseCase } from '../../application/use-cases/drivers/li
 import { NearbyDriversDto } from '../dtos/nearby-drivers.dto';
 import { Driver } from '../../domain/entities/driver.entity';
 
+// Controlador que maneja las solicitudes HTTP relacionadas con conductores, proporcionando endpoints para listar todos, los disponibles y los cercanos a una ubicación.
 @ApiTags('drivers')
 @Controller('drivers')
 export class DriversController {
+  // Inyecta los casos de uso para listar conductores
   constructor(
     private readonly listDriversUseCase: ListDriversUseCase,
     private readonly listAvailableDriversUseCase: ListAvailableDriversUseCase,
     private readonly listNearbyDriversUseCase: ListNearbyDriversUseCase
   ) {}
 
+  // Endpoint para obtener la lista de todos los conductores
   @Get()
   @ApiOperation({ summary: 'List all drivers' })
   @ApiResponse({
@@ -26,6 +29,7 @@ export class DriversController {
     return this.listDriversUseCase.execute();
   }
 
+  // Endpoint para obtener la lista de conductores disponibles
   @Get('available')
   @ApiOperation({ summary: 'List available drivers' })
   @ApiResponse({
@@ -37,6 +41,7 @@ export class DriversController {
     return this.listAvailableDriversUseCase.execute();
   }
 
+  // Endpoint para obtener la lista de conductores cercanos según coordenadas
   @Get('nearby')
   @ApiOperation({ summary: 'List nearby drivers' })
   @ApiResponse({

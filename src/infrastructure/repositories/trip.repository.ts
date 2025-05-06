@@ -15,8 +15,10 @@ import { DriverRepository } from './driver.repository';
 import { PassengerRepository } from './passenger.repository';
 import { DriverStatus } from '../../domain/entities/enums/driver-status.enum';
 
+// Repositorio para gestionar operaciones de base de datos relacionadas con viajes, como crear, listar, buscar por ID y completar viajes, asegurando la disponibilidad de conductores y pasajeros.
 @Injectable()
 export class TripRepository {
+  // Inyecta el repositorio de TypeORM para la entidad Trip y los repositorios de conductores y pasajeros
   constructor(
     @InjectRepository(Trip)
     private readonly repository: Repository<Trip>,
@@ -24,6 +26,7 @@ export class TripRepository {
     private readonly passengerRepository: PassengerRepository
   ) {}
 
+  // Obtiene una lista de viajes con paginación, incluyendo datos de conductor y pasajero
   async findAll(
     query: ListTripsQueryDto
   ): Promise<{ trips: Trip[]; total: number }> {
@@ -36,6 +39,7 @@ export class TripRepository {
     return { trips, total };
   }
 
+  // Busca un viaje por su ID, incluyendo datos de conductor y pasajero
   async findById(id: string): Promise<Trip | null> {
     return this.repository.findOne({
       where: { id },
@@ -43,6 +47,7 @@ export class TripRepository {
     });
   }
 
+  // Crea un nuevo viaje, verificando la existencia de pasajero y conductor, asignando un conductor disponible si no se especifica
   async create(dto: CreateTripDto): Promise<Trip> {
     const passenger = await this.passengerRepository.findById(dto.passenger_id);
     if (!passenger) {
@@ -96,6 +101,7 @@ export class TripRepository {
     return result[0];
   }
 
+  // Completa un viaje activo, actualizando su estado, costo y liberando al conductor
   async complete(id: string, dto: CompleteTripDto): Promise<Trip> {
     const trip = await this.findById(id);
     if (!trip) {

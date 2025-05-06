@@ -1,6 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
+// Migración para poblar la tabla de conductores con datos iniciales, insertando tres registros de ejemplo para pruebas o desarrollo.
 export class SeedDriversTable1698765432101 implements MigrationInterface {
+  // Inserta datos iniciales en la tabla de conductores
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       INSERT INTO drivers (id, name, phone, location, status, created_at)
@@ -11,6 +13,7 @@ export class SeedDriversTable1698765432101 implements MigrationInterface {
     `);
   }
 
+  // Revierte la migración eliminando los datos insertados
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       DELETE FROM drivers WHERE id IN (

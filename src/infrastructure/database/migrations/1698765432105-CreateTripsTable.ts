@@ -1,8 +1,12 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
+// Migración para crear la tabla 'trips' en la base de datos, que almacena información de viajes, incluyendo ubicación, conductor, pasajero, costo y estado.
 export class CreateTripsTable1698765432105 implements MigrationInterface {
+  // Método que ejecuta la creación de la tabla 'trips' al aplicar la migración
   public async up(queryRunner: QueryRunner): Promise<void> {
+    // Habilita la extensión PostGIS para soporte de datos geoespaciales
     await queryRunner.query('CREATE EXTENSION IF NOT EXISTS postgis;');
+    // Crea la tabla 'trips' con columnas para ID, conductor, pasajero, ubicaciones, estado, costo y fechas
     await queryRunner.createTable(
       new Table({
         name: 'trips',
@@ -60,6 +64,7 @@ export class CreateTripsTable1698765432105 implements MigrationInterface {
             isNullable: true,
           },
         ],
+        // Define claves foráneas para relacionar con las tablas de conductores y pasajeros
         foreignKeys: [
           {
             columnNames: ['driver_id'],
@@ -74,6 +79,7 @@ export class CreateTripsTable1698765432105 implements MigrationInterface {
             onDelete: 'SET NULL',
           },
         ],
+        // Crea un índice espacial para optimizar consultas geoespaciales en la columna start_location
         indices: [
           {
             name: 'idx_trips_start_location',
@@ -86,6 +92,7 @@ export class CreateTripsTable1698765432105 implements MigrationInterface {
     );
   }
 
+  // Método que elimina la tabla 'trips' al revertir la migración
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.dropTable('trips');
   }

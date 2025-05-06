@@ -12,21 +12,24 @@ import { InvoicesModule } from './modules/invoices.module';
 
 @Module({
   imports: [
+    // Configura el módulo global para cargar variables de entorno desde el archivo .env
     ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
+      isGlobal: true, // Hace que las variables de entorno estén disponibles en toda la aplicación
+      envFilePath: '.env', // Especifica la ubicación del archivo de configuración
     }),
+    // Configura TypeORM para conectar con la base de datos PostgreSQL usando variables de entorno
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
+      imports: [ConfigModule], // Permite acceso al ConfigService
       useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        url: configService.get<string>('DATABASE_URL'),
+        type: 'postgres', // Define el tipo de base de datos
+        url: configService.get<string>('DATABASE_URL'), // Obtiene la URL de conexión desde .env
         entities: [Driver, Passenger, Trip, Invoice],
-        synchronize: false,
-        logging: ['error', 'warn'],
+        synchronize: false, // Evita la sincronización automática para producción
+        logging: ['error', 'warn'], // Registra solo errores y advertencias
       }),
-      inject: [ConfigService],
+      inject: [ConfigService], // Inyecta el ConfigService para acceder a las variables de entorno
     }),
+    // Incluye los módulos de funcionalidades específicas de la aplicación
     DriversModule,
     PassengersModule,
     TripsModule,

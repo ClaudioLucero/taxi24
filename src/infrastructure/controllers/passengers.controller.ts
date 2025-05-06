@@ -9,9 +9,11 @@ import { NearbyDriversDto } from '../dtos/nearby-drivers.dto';
 import { Passenger } from '../../domain/entities/passenger.entity';
 import { Driver } from '../../domain/entities/driver.entity';
 
+// Controlador que maneja las solicitudes HTTP relacionadas con pasajeros, como listar, obtener detalles, crear pasajeros y buscar conductores cercanos.
 @ApiTags('passengers')
 @Controller('passengers')
 export class PassengersController {
+  // Inyecta los casos de uso necesarios para la lógica de negocio
   constructor(
     private readonly listPassengersUseCase: ListPassengersUseCase,
     private readonly getPassengerUseCase: GetPassengerUseCase,
@@ -19,6 +21,7 @@ export class PassengersController {
     private readonly listNearbyDriversUseCase: ListNearbyDriversUseCase
   ) {}
 
+  // Lista todos los pasajeros en la aplicación
   @Get()
   @ApiOperation({ summary: 'List all passengers' })
   @ApiResponse({
@@ -30,6 +33,7 @@ export class PassengersController {
     return this.listPassengersUseCase.execute();
   }
 
+  // Obtiene los detalles de un pasajero por su ID
   @Get(':id')
   @ApiOperation({ summary: 'Get a passenger by ID' })
   @ApiResponse({
@@ -42,6 +46,7 @@ export class PassengersController {
     return this.getPassengerUseCase.execute(id);
   }
 
+  // Crea un nuevo pasajero con los datos proporcionados
   @Post()
   @ApiOperation({ summary: 'Create a new passenger' })
   @ApiResponse({
@@ -53,6 +58,7 @@ export class PassengersController {
     return this.createPassengerUseCase.execute(dto);
   }
 
+  // Busca conductores cercanos para un pasajero, verificando primero que el pasajero exista
   @Get(':id/nearby-drivers')
   @ApiOperation({ summary: 'List nearby drivers for a passenger' })
   @ApiResponse({

@@ -5,14 +5,17 @@ import { Invoice } from '../../domain/entities/invoice.entity';
 import { CreateInvoiceDto, InvoiceFiltersDto } from '../dtos/invoice.dto';
 import { TripRepository } from './trip.repository';
 
+// Repositorio para gestionar operaciones de base de datos relacionadas con facturas, como crear, buscar por ID o filtrar por criterios como pasajero, conductor o fechas.
 @Injectable()
 export class InvoiceRepository {
+  // Inyecta el repositorio de TypeORM para la entidad Invoice y el repositorio de viajes
   constructor(
     @InjectRepository(Invoice)
     private readonly repository: Repository<Invoice>,
     private readonly tripRepository: TripRepository
   ) {}
 
+  // Obtiene una lista de facturas con filtros (pasajero, conductor, fechas) y paginación
   async findAll(
     filters: InvoiceFiltersDto
   ): Promise<{ invoices: Invoice[]; total: number }> {
@@ -52,6 +55,7 @@ export class InvoiceRepository {
     return { invoices, total };
   }
 
+  // Busca una factura por su ID, incluyendo datos relacionados del viaje, pasajero y conductor
   async findById(id: string): Promise<Invoice | null> {
     return this.repository.findOne({
       where: { id },
@@ -59,6 +63,7 @@ export class InvoiceRepository {
     });
   }
 
+  // Busca una factura por el ID del viaje asociado
   async findByTripId(tripId: string): Promise<Invoice | null> {
     return this.repository.findOne({
       where: { trip_id: tripId },
@@ -66,6 +71,7 @@ export class InvoiceRepository {
     });
   }
 
+  // Crea una nueva factura, verificando que el viaje asociado exista
   async create(dto: CreateInvoiceDto): Promise<Invoice> {
     const trip = await this.tripRepository.findById(dto.trip_id);
     if (!trip) {

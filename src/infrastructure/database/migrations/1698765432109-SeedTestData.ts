@@ -1,8 +1,10 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
+// Migración para poblar la base de datos con datos de prueba, incluyendo pasajeros, conductores, viajes y facturas, para facilitar pruebas y desarrollo.
 export class SeedTestData1698765432109 implements MigrationInterface {
+  // Método que ejecuta la inserción de datos de prueba
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Limpiar datos existentes
+    // Limpia las tablas existentes para evitar duplicados
     await queryRunner.query(
       `TRUNCATE TABLE invoices RESTART IDENTITY CASCADE;`
     );
@@ -12,7 +14,7 @@ export class SeedTestData1698765432109 implements MigrationInterface {
       `TRUNCATE TABLE passengers RESTART IDENTITY CASCADE;`
     );
 
-    // Insertar pasajeros
+    // Inserta datos de prueba para pasajeros
     await queryRunner.query(`
       INSERT INTO passengers (id, name, phone, created_at)
       VALUES
@@ -21,7 +23,7 @@ export class SeedTestData1698765432109 implements MigrationInterface {
         ('550e8400-e29b-41d4-a716-446655440005', 'Sofía Ramírez', '7778889999', NOW())
     `);
 
-    // Insertar conductores
+    // Inserta datos de prueba para conductores con ubicaciones geográficas
     await queryRunner.query(`
       INSERT INTO drivers (id, name, phone, location, status, created_at)
       VALUES
@@ -30,7 +32,7 @@ export class SeedTestData1698765432109 implements MigrationInterface {
         ('550e8400-e29b-41d4-a716-446655440002', 'Carlos López', '5556667777', ST_SetSRID(ST_MakePoint(-74.007, 40.714), 4326), 'busy', NOW())
     `);
 
-    // Insertar viajes
+    // Inserta datos de prueba para viajes, asociando conductores y pasajeros
     await queryRunner.query(`
       INSERT INTO trips (id, driver_id, passenger_id, start_location, end_location, status, cost, created_at, completed_at)
       VALUES
@@ -38,7 +40,7 @@ export class SeedTestData1698765432109 implements MigrationInterface {
         ('550e8400-e29b-41d4-a716-446655440006', '550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440004', ST_SetSRID(ST_MakePoint(-74.005, 40.713), 4326), ST_SetSRID(ST_MakePoint(-74.01, 40.72), 4326), 'completed', 20.00, NOW(), NOW())
     `);
 
-    // Insertar facturas
+    // Inserta datos de prueba para facturas, asociadas a un viaje
     await queryRunner.query(`
       INSERT INTO invoices (id, trip_id, amount, created_at)
       VALUES
@@ -46,7 +48,9 @@ export class SeedTestData1698765432109 implements MigrationInterface {
     `);
   }
 
+  // Método que revierte la migración eliminando todos los datos insertados
   public async down(queryRunner: QueryRunner): Promise<void> {
+    // Limpia todas las tablas para deshacer los cambios
     await queryRunner.query(
       `TRUNCATE TABLE invoices RESTART IDENTITY CASCADE;`
     );

@@ -12,22 +12,33 @@ import { DriversModule } from './drivers.module';
 import { PassengersModule } from './passengers.module';
 import { InvoicesModule } from './invoices.module';
 
+// Módulo para gestionar viajes, integrando funcionalidades de creación, finalización, consulta y relación con facturas, conductores y pasajeros.
 @Module({
+  // Configura las dependencias necesarias para el módulo
   imports: [
+    // Habilita el uso de la entidad Trip con TypeORM para operaciones en la base de datos
     TypeOrmModule.forFeature([Trip]),
+    // Incluye módulos relacionados para conductores, pasajeros y facturas
     DriversModule,
     PassengersModule,
+    // Usa forwardRef para manejar la dependencia circular con InvoicesModule
     forwardRef(() => InvoicesModule),
   ],
+  // Define el controlador para manejar solicitudes HTTP de viajes
   controllers: [TripsController],
+  // Registra los servicios para la lógica de negocio y acceso a datos
   providers: [
+    // Maneja operaciones de base de datos para viajes
     TripRepository,
+    // Lógica para crear, completar, obtener y listar viajes, y obtener facturas de viajes
     CreateTripUseCase,
     CompleteTripUseCase,
     GetTripUseCase,
     ListTripsUseCase,
     GetTripInvoiceUseCase,
   ],
-  exports: [TripRepository, GetTripInvoiceUseCase], // Añadir GetTripInvoiceUseCase
+  // Comparte el repositorio y el caso de uso de facturas con otros módulos
+  exports: [TripRepository, GetTripInvoiceUseCase],
 })
+// Clase que representa el módulo de viajes
 export class TripsModule {}

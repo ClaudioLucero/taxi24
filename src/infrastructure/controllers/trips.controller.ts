@@ -21,9 +21,11 @@ import {
 import { Invoice } from '../../domain/entities/invoice.entity';
 import { Trip } from '../../domain/entities/trip.entity';
 
+// Controlador que maneja las solicitudes HTTP para gestionar viajes, como listar, crear, completar o consultar facturas asociadas.
 @ApiTags('trips')
 @Controller('trips')
 export class TripsController {
+  // Inyecta los casos de uso necesarios para la lógica de negocio de los viajes
   constructor(
     private readonly listTripsUseCase: ListTripsUseCase,
     private readonly getTripUseCase: GetTripUseCase,
@@ -32,6 +34,7 @@ export class TripsController {
     private readonly getTripInvoiceUseCase: GetTripInvoiceUseCase
   ) {}
 
+  // Lista todos los viajes con soporte para filtros y paginación
   @Get()
   @ApiOperation({ summary: 'List all trips with pagination' })
   @ApiResponse({ status: 200, description: 'List of trips', type: [Trip] })
@@ -41,6 +44,7 @@ export class TripsController {
     return this.listTripsUseCase.execute(query);
   }
 
+  // Obtiene los detalles de un viaje por su ID
   @Get(':id')
   @ApiOperation({ summary: 'Get a trip by ID' })
   @ApiResponse({ status: 200, description: 'Trip details', type: Trip })
@@ -49,6 +53,7 @@ export class TripsController {
     return this.getTripUseCase.execute(id);
   }
 
+  // Crea un nuevo viaje con los datos proporcionados
   @Post()
   @ApiOperation({ summary: 'Create a new trip' })
   @ApiResponse({ status: 201, description: 'Trip created', type: Trip })
@@ -56,6 +61,7 @@ export class TripsController {
     return this.createTripUseCase.execute(dto);
   }
 
+  // Marca un viaje como completado, actualizando su estado
   @Patch(':id/complete')
   @ApiOperation({ summary: 'Complete a trip' })
   @ApiResponse({ status: 200, description: 'Trip completed', type: Trip })
@@ -67,6 +73,7 @@ export class TripsController {
     return this.completeTripUseCase.execute(id, dto);
   }
 
+  // Obtiene la factura asociada a un viaje por su ID
   @Get(':id/invoice')
   @ApiOperation({ summary: 'Get invoice by trip ID' })
   @ApiResponse({ status: 200, description: 'Invoice details', type: Invoice })
