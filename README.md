@@ -1,6 +1,5 @@
 # 🚖 Taxi24 API
 
-# 🚖 Taxi24 API
 
 **Taxi24** es una API RESTful diseñada para una startup que ofrece una solución *white label* para la gestión de flotas de transporte. Permite a otras empresas administrar conductores, pasajeros, viajes y facturas mediante endpoints públicos sin autenticación.
 
