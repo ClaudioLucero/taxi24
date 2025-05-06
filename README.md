@@ -52,10 +52,9 @@ cd taxi24
 2. Instalar dependencias
 npm install
 
-3. Configurar variables de entorno
-Crea un archivo .env en la raíz del proyecto:
-
-   # Base de datos principal
+3. Variables de entorno
+```bash
+# Base de datos principal
 DATABASE_URL=postgresql://taxi24:taxi24@localhost:5433/taxi24
 
 # Base de datos para pruebas
@@ -67,6 +66,10 @@ PORT=3000
 # Límite de peticiones (Throttle)
 THROTTLE_TTL=60
 THROTTLE_LIMIT=100
+```
+
+
+
 
 4. Configurar la base de datos
 Asegúrate de tener PostgreSQL corriendo. Luego:
